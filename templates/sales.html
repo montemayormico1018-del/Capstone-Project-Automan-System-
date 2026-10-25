@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+
+    <style>
+        /* Print Styles - Toyota Invoice Layout */
+        @media print {
+            @page {
+                size: A4;
+                margin: 8mm 10mm;
+            }
+
+            /* The invoice's screen layout uses generous inline padding/
+               margins (20-32px boxes, 1.5rem section gaps) meant for
+               on-screen viewing — with more than a couple of line items
+               or a longer diagnosis/notes, that pushed the invoice past
+               one page. Rather than hunting down every individual inline
+               style, scale the whole thing down uniformly so it reliably
+               fits one A4 page regardless of content length. */
+            #invoicePaper {
+                zoom: 0.82;
+            }
+            
+            body * {
+                visibility: hidden;
+            }
+            
+            #saleDetailModal,
+            #saleDetailModal .modal-dialog,
+            #saleDetailModal .modal-content,
+            #saleDetailModal .modal-body,
+            #saleDetailModal .modal-header,
+            #saleDetailModal #invoicePaper {
+                visibility: visible;
+                display: block !important;
+            }
+
+            /* Every element inside the invoice also matched "body *" above and
+               got visibility:hidden set directly on itself — making the
+               #invoicePaper container visible again doesn't cascade to
+               already-hidden descendants, so the printed page came out
+               blank. Restore visibility (not display, which would collapse
+               table cells/inline elements onto their own natural type). */
+            #saleDetailModal #invoicePaper * {
+                visibility: visible;
+            }
+            
+            #saleDetailModal {
+                /* position: fixed pins an element to one viewport-sized area
+                   even when printing — the browser won't flow it across
+                   multiple pages, so any content past the first page's
+                   height was simply cut off. static lets it flow normally
+                   and paginate like any other content. */
+                position: static !important;
+                margin: 0 !important;
+                padding: 0;
+                background: white !important;
+                overflow: visible;
+            }
+
+            /* visibility:hidden (not display:none) is used above so the
+               invoice's own descendants can be selectively restored to
+               visible — but visibility:hidden still occupies its normal
+               layout space. #saleDetailModal comes AFTER the sidebar and
+               page content in the DOM, and once it's position:static it
+               respects that DOM order — so the whole (invisible) page it
+               sits behind was still pushing it down by its full height,
+               printing as a blank first page. Actually remove that
+               content from layout instead of just hiding it. */
+            /* Extra-specific selectors (not just the bare class), because
+               the page's own unconditional ".layout-container { display:
+               flex !important }" rule (further down this same file) is
+               equally !important and comes later in source order — normal
+               cascade rules still apply inside a media query, so without
+               the higher specificity here that rule kept winning even
+               while printing, and the container never actually left the
+               layout. */
+            body .layout-container,
+            body .mobile-header,
+            body .sidebar-overlay {
+                display: none !important;
+            }
+            
+            #saleDetailModal .modal-dialog {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+            
+            #saleDetailModal .modal-content {
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            
+            #saleDetailModal .btn-close,
+            #saleDetailModal .modal-footer,
+            #saleDetailModal .btn {
+                display: none !important;
+                height: 0;
+                padding: 0;
+                margin: 0;
+                border: none;
+            }
+            
+            #saleDetailModal #invoicePaper {
+                border: none !important;
+            }
+            
+            .modal-body,
+            #invoicePaper {
+                background: white !important;
+            }
+            
+            body {
+                overflow: visible !important;
+                height: auto !important;
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            html {
+                overflow: visible !important;
+            }
+            
+            /* Ensure table borders print */
+            table, th, td {
+                border-color: #e2e8f0 !important;
+            }
+        }
+        
+        /* Prevent horizontal overflow */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+            width: 100%;
+        }
+        .page-header {
+    background: linear-gradient(135deg, #0f0f10, #2a2a2e) !important;
+    border-radius: 20px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+}
+
+.page-header h3,
+.page-header h3 i {
+    color: #ffffff !important;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.page-header .page-subtitle {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.95rem;
+}
+        
+        /* Invoice table styling */
+        #saleDetailItems tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .sidebar {
+            background: var(--primary-color);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            color: white;
+            z-index: 10;
+        }
+        
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .sidebar a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 12px;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), #ff6b6b);
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+        }
+        
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 0 12px 20px;
+        }
+        
+        .user-info .badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        /* "Paid"/"Sent" are plain Bootstrap badges sitting next to the
+           "View"/"Send" buttons in the same action group — badges are much
+           smaller than this app's buttons by default (design-system.css
+           gives every .btn a 40px min-height + 16px padding), so they
+           looked like a different, smaller control next to them. Match
+           the button's actual rendered size exactly. */
+        .sale-status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            min-width: 87px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14.4px;
+        }
+
+        /* Table layout fixes */
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            display: block !important;
+        }
+
+        .table-responsive > .table {
+            width: 100%;
+            min-width: 1000px;
+            margin-bottom: 0;
+        }
+
+        .table-responsive > .table > thead > tr > th:first-child,
+        .table-responsive > .table > tbody > tr > td:first-child {
+            padding-left: 1.5rem !important;
+        }
+
+        /* Invoice numbers (e.g. INV-20260905-0002) are long and were
+           wrapping mid-string onto a second line, throwing off row
+           height/alignment. Keep them on one line; the table already
+           scrolls horizontally via .table-responsive if needed. */
+        #salesTable td:first-child {
+            white-space: nowrap;
+        }
+
+        .card {
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .sidebar-overlay.show { display: block; }
+        
+        /* ════ INVOICE STYLES ════ */
+        .invoice-paper {
+            background: #fff !important;
+            border: none !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+        }
+        
+        .invoice-header-brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 28px 32px;
+            border-bottom: 3px solid #0f0f10;
+            background: #f8fafc;
+        }
+        
+        .invoice-brand-icon {
+            font-size: 2.5rem;
+            color: #e53935;
+            line-height: 1;
+        }
+        
+        .invoice-brand-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin: 0;
+            color: #0f0f10;
+        }
+        
+        .invoice-brand-subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        .invoice-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f0f10;
+            margin: 0;
+            letter-spacing: 2px;
+        }
+        
+        .invoice-number {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .invoice-body {
+            padding: 28px 32px;
+            background: #fff;
+        }
+        
+        .invoice-info-card {
+            padding: 14px 16px !important;
+            background: #f1f5f9 !important;
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        .invoice-info-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        
+        .invoice-customer-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f0f10;
+            margin-bottom: 4px;
+        }
+        
+        .invoice-customer-detail {
+            font-size: 0.85rem;
+            color: #475569;
+            margin-bottom: 2px;
+        }
+        
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        .invoice-table tr {
+            border: none !important;
+        }
+        
+        .invoice-table td {
+            padding: 6px 0 !important;
+            border: none !important;
+        }
+        
+        .invoice-table-strong {
+            font-weight: 700 !important;
+            color: #0f0f10;
+        }
+        
+        .invoice-table-right {
+            text-align: right !important;
+        }
+        
+        .work-details-section {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #e53935;
+        }
+        
+        .work-details-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0f0f10;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .services-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0f0f10;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .invoice-items-card {
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: none !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+        }
+        
+        .invoice-items-header {
+            background: #1a1a1d;
+            padding: 12px 16px;
+            color: #fff;
+        }
+        
+        .invoice-items-header h6 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .invoice-table-header {
+            background: #f1f5f9 !important;
+            color: #0f0f10 !important;
+        }
+        
+        .invoice-table-header th {
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+            padding: 10px 12px !important;
+            color: #475569 !important;
+        }
+        
+        .invoice-table-body td {
+            padding: 10px 12px !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            font-size: 0.85rem;
+            color: #1a1a1d;
+        }
+        
+        .invoice-table-body tr:last-child td {
+            border-bottom: none !important;
+        }
+        
+        .invoice-payment-card {
+            padding: 16px !important;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+        }
+        
+        .invoice-payment-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0f0f10;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .invoice-paid {
+            color: #10b981 !important;
+            font-weight: 700;
+        }
+        
+        .invoice-balance-due {
+            color: #e53935 !important;
+            font-weight: 700;
+        }
+        
+        .invoice-summary-card {
+            padding: 16px !important;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+        }
+        
+        .invoice-summary-table {
+            font-size: 0.85rem;
+        }
+        
+        .invoice-summary-table td {
+            padding: 6px 0 !important;
+            border: none !important;
+        }
+        
+        .invoice-summary-total-row {
+            border-top: 2px solid #e2e8f0 !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+        }
+        
+        .invoice-summary-total-row td {
+            padding: 10px 0 !important;
+        }
+        
+        .invoice-summary-total-value {
+            color: #10b981;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+        }
+        
+        .invoice-notes-section {
+            margin-top: 20px;
+        }
+        
+        .invoice-notes-card {
+            padding: 16px !important;
+            background: #f1f5f9 !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+        }
+        
+        .invoice-notes-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0f0f10;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .invoice-notes-text {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        
+        .invoice-timestamps-section {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        .invoice-footer {
+            padding: 20px 32px;
+            border-top: 2px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 0.8rem;
+        }
+        
+        .invoice-footer-text {
+            line-height: 1.6;
+        }
+        
+        .invoice-modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+            gap: 8px;
+        }
+        
+        /* Modal improvements */
+        #saleDetailModal .modal-dialog {
+            max-width: 900px !important;
+        }
+        
+        #saleDetailModal .modal-content {
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+            border-radius: 10px !important;
+        }
+        
+        #saleDetailModal .btn-secondary {
+            background-color: #6b7280;
+            border-color: #6b7280;
+        }
+        
+        #saleDetailModal .btn-secondary:hover {
+            background-color: #4b5563;
+            border-color: #4b5563;
+        }
+        
+        #saleDetailModal .btn-outline-primary {
+            color: #0f0f10;
+            border-color: #0f0f10;
+        }
+        
+        #saleDetailModal .btn-outline-primary:hover {
+            background-color: #0f0f10;
+            border-color: #0f0f10;
+            color: #fff;
+        }
+        
+        #saleDetailModal .btn {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+            
+            .layout-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: 280px !important;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0) !important;
+            }
+            
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding-top: 1rem;
+            }
+            
+            /* Invoice mobile styles */
+            .invoice-header-brand {
+                padding: 16px 12px;
+            }
+            
+            .invoice-title {
+                font-size: 1.5rem;
+            }
+            
+            .invoice-brand-title {
+                font-size: 1.3rem;
+            }
+            
+            .invoice-body {
+                padding: 16px 12px;
+            }
+            
+            .invoice-footer {
+                padding: 16px 12px;
+            }
+            
+            .row {
+                flex-direction: column !important;
+            }
+            
+            .col-md-6 {
+                width: 100% !important;
+            }
+            
+            .invoice-table-header th {
+                font-size: 0.7rem !important;
+                padding: 6px 8px !important;
+            }
+            
+            .invoice-table-body td {
+                padding: 8px 4px !important;
+                font-size: 0.8rem;
+            }
+        }
+        
+    </style>
+
+    <script>
+        window.onload = function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        };
+        
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.scrollTo(0, 0);
+            }
+        };
+    </script>
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+            
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+            
+            <nav id="sidebarNav"></nav>
+            
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3><i class="bi bi-receipt me-2"></i>Sales</h3>
+                        <p class="mb-0 page-subtitle">View and manage sales transactions</p>
+                    </div>
+                </div>
+            </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row mb-3 filter-row">
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterStatus" onchange="loadSales()">
+                                    <option value="">All Payments</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Partial">Partial</option>
+                                    <option value="Notified">Notified</option>
+                                    <option value="Paid">Paid</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Customer</th>
+                                        <th>Vehicle</th>
+                                        <th class="text-end">Subtotal</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end">Paid</th>
+                                        <th class="text-end">Balance</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesTable">
+                                    <tr><td colspan="9" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+    </div>
+
+    <!-- Sale Detail Modal - Improved Invoice -->
+    <div class="modal fade" id="saleDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content" id="invoicePaper">
+                <!-- Header -->
+                <div class="invoice-header" style="background: linear-gradient(135deg, #0f0f10 0%, #1a1a1d 100%); color: white; padding: 24px 32px;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width: 56px; height: 56px; background: #e53935; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-car-front" style="font-size: 28px; color: white;"></i>
+                            </div>
+                            <div>
+                                <h2 style="margin: 0; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; color: #ffffff;">
+    AUTOMAN
+</h2>
+
+<div style="font-size: 0.8rem; color: #cbd5f5; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">
+    Car Care Center
+</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div style="font-size: 2rem; font-weight: 700; letter-spacing: 2px; opacity: 0.9;">INVOICE</div>
+                            <div id="saleModalInvoice" style="font-size: 0.95rem; opacity: 0.8; margin-top: 4px;">INV-000000</div>
+                            <div id="saleDetailStatusBadge" style="margin-top: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Body -->
+                <div class="invoice-body" style="padding: 28px 32px;">
+                    <!-- Info Cards Row -->
+                    <div class="row mb-4 g-4">
+                        <div class="col-md-6">
+                            <div class="section-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                    <i class="bi bi-person-badge" style="color: #e53935; font-size: 1.1rem;"></i>
+                                    <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Customer</span>
+                                </div>
+                                <div id="saleDetailCustomer" style="font-size: 1.1rem; font-weight: 700; color: #0f0f10; margin-bottom: 4px;">-</div>
+                                <div id="saleDetailVehicle" style="font-size: 0.9rem; color: #475569; margin-bottom: 4px;">-</div>
+                                <div style="font-size: 0.85rem; color: #64748b;">Plate: <span id="saleDetailPlate" style="font-weight: 600; color: #0f0f10;">-</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="section-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                    <i class="bi bi-info-circle" style="color: #e53935; font-size: 1.1rem;"></i>
+                                    <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Details</span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Invoice #</div>
+                                        <div id="saleDetailInvoiceNum" style="font-weight: 700; color: #0f0f10;">-</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Job Order</div>
+                                        <div id="saleDetailJobOrder" style="font-weight: 700; color: #0f0f10;">-</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase;">Date</div>
+                                        <div id="saleDetailDate" style="font-weight: 600; color: #475569;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Work Details Section -->
+                    <div class="mb-4" id="workDetailsSection">
+                        <div style="background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #e53935; border-radius: 8px; padding: 16px 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <i class="bi bi-wrench-adjustable" style="color: #e53935;"></i>
+                                <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f0f10;">Work Details</span>
+                            </div>
+                            <div id="saleDetailDiagnosis" style="margin-bottom: 8px;"></div>
+                            <div id="saleDetailWorkDesc" style="margin-bottom: 8px;"></div>
+                            <div id="saleDetailMechanicNotes"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Services Section -->
+                    <div class="mb-4">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <i class="bi bi-list-check" style="color: #e53935; font-size: 1.1rem;"></i>
+                            <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f0f10;">Services Performed</span>
+                        </div>
+                        <div id="saleDetailServicesBadges" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                    
+                    <!-- Items Table -->
+                    <div class="mb-4" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                        <div style="background: #1a1a1d; color: white; padding: 14px 20px; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-receipt"></i>
+                            <span style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Invoice Items</span>
+                        </div>
+                        <table class="table table-hover mb-0">
+                            <thead style="background: #f1f5f9;">
+                                <tr>
+                                    <th style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; padding: 12px 20px;">Description</th>
+                                    <th style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; padding: 12px; text-align: center; width: 80px;">Qty</th>
+                                    <th style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; padding: 12px; text-align: right; width: 130px;">Unit Price</th>
+                                    <th style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; padding: 12px 20px; text-align: right; width: 140px;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saleDetailItems" style="border-top: 2px solid #e2e8f0;"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Summary & Payment Row -->
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                                    <i class="bi bi-credit-card" style="color: #e53935; font-size: 1.1rem;"></i>
+                                    <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f0f10;">Payment Status</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span style="font-size: 0.8rem; color: #64748b;">Payment Method</span>
+                                    <div id="saleDetailPaymentMethod" style="font-weight: 700; color: #0f0f10; margin-top: 2px;">-</div>
+                                </div>
+                                <div class="mb-2">
+                                    <span style="font-size: 0.8rem; color: #64748b;">Amount Paid</span>
+                                    <div id="saleDetailPaid" style="font-weight: 700; color: #10b981; font-size: 1.1rem; margin-top: 2px;">-</div>
+                                </div>
+                                <div class="mb-2" id="saleDetailVoucherRow" style="display: none;">
+                                    <span style="font-size: 0.8rem; color: #64748b;">Loyalty Voucher</span>
+                                    <div id="saleDetailVoucher" style="font-weight: 700; color: #0f0f10; margin-top: 2px;">-</div>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.8rem; color: #64748b;">Balance Due</span>
+                                    <div id="saleDetailBalance" style="font-weight: 700; color: #e53935; font-size: 1.2rem; margin-top: 2px;">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div style="background: linear-gradient(135deg, #0f0f10 0%, #1a1a1d 100%); color: white; border-radius: 12px; padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                                    <i class="bi bi-calculator" style="font-size: 1.1rem;"></i>
+                                    <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Summary</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2" style="opacity: 0.8;">
+                                    <span style="font-size: 0.85rem;">Subtotal</span>
+                                    <span id="saleDetailSubtotal" style="font-weight: 600;">-</span>
+                                </div>
+                                <div style="border-top: 2px solid rgba(255,255,255,0.2); margin-top: 12px; padding-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 1rem; font-weight: 700;">TOTAL</span>
+                                    <span id="saleDetailTotal" style="font-size: 1.4rem; font-weight: 800; color: #4ade80;">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes Section -->
+                    <div class="mt-4" id="notesSection">
+                        <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 16px 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="bi bi-chat-left-text" style="color: #d97706;"></i>
+                                <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #92400e;">Notes</span>
+                            </div>
+                            <p id="saleDetailNotes" style="margin: 0; font-size: 0.9rem; color: #78350f;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="mt-4 pt-4" style="border-top: 1px solid #e2e8f0;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div style="font-size: 0.8rem; color: #64748b;">
+                                    <strong style="color: #0f0f10;">Payment Terms:</strong><br>
+                                    <span style="color: #475569;">• Payment due upon completion of service<br>
+                                    • Please settle balance before vehicle release<br>
+                                    • Accepted: Cash, Card, GCash, Bank Transfer</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div style="font-size: 0.8rem; color: #64748b;">
+                                    <strong style="color: #0f0f10;">Automan Car Care Center</strong><br>
+                                    <span style="color: #475569;">Fil-Am Friendship Hwy, Angeles, Pampanga<br>
+                                    Phone: (63) 968-236-7189 | Email: automansystem@gmail.com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3" style="font-size: 0.85rem; color: #94a3b8; font-style: italic;">
+                            Thank you for your business!
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer Buttons -->
+                <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; gap: 8px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">
+                        <i class="bi bi-x-lg me-1"></i>Close
+                    </button>
+                    <button type="button" class="btn btn-outline-dark" onclick="window.print()" id="btnPrint" style="border-radius: 8px;">
+                        <i class="bi bi-printer me-1"></i>Print Invoice
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="recordPayment()" id="btnRecordPayment" style="border-radius: 8px;">
+                        <i class="bi bi-credit-card me-1"></i>Record Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+        let salesList = [];
+
+        if (!authToken) window.location.href = '/login';
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (!['admin', 'staff'].includes(user.role)) window.location.href = user.role === 'customer' ? '/customer' : '/dashboard';
+
+        buildSidebar();
+
+        async function loadSales() {
+            try {
+                const status = document.getElementById('filterStatus').value;
+                const url = status ? `${API_BASE}/sales?payment_status=${status}` : `${API_BASE}/sales`;
+
+                const response = await fetch(url, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const sales = await response.json();
+                salesList = sales; // store for modal actions
+                const role = (user.role || '').toLowerCase();
+
+                document.getElementById('salesTable').innerHTML = sales.map(sale => {
+                    let statusClass = 'status-pending';
+                    if (sale.payment_status === 'Paid') statusClass = 'status-paid';
+                    else if (sale.payment_status === 'Partial') statusClass = 'status-partial';
+                    else if (sale.payment_status === 'Notified') statusClass = 'status-notified';
+                    
+                    const canSendPayment = (role === 'admin' || role === 'staff') && sale.payment_status !== 'Paid' && sale.payment_status !== 'Notified';
+                    
+                    return `
+                    <tr>
+                        <td><strong>${escapeHtml(sale.invoice_number)}</strong></td>
+                        <td>${sale.customer_name ? escapeHtml(sale.customer_name) : '-'}</td>
+                        <td>${sale.vehicle_info ? escapeHtml(sale.vehicle_info) : '-'}</td>
+                        <td class="text-end">PHP ${(sale.subtotal || 0).toLocaleString()}</td>
+                        <td class="text-end fw-bold">PHP ${(sale.total || 0).toLocaleString()}</td>
+                        <td class="text-end">PHP ${(sale.amount_paid || 0).toLocaleString()}</td>
+                        <td class="text-end ${sale.balance_due > 0 ? 'text-danger' : ''} fw-bold">PHP ${(sale.balance_due || 0).toLocaleString()}</td>
+                        <td><span class="status-badge ${statusClass}">${sale.payment_status}</span></td>
+                        <td>
+                            <div class="d-flex flex-wrap align-items-center gap-1 table-actions">
+                                <button class="btn btn-sm btn-primary" onclick="viewSale('${sale.id}')">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </button>
+                                ${canSendPayment ? `
+                                    <button class="btn btn-sm btn-outline-primary" onclick="sendPaymentLink('${sale.id}')">
+                                        <i class="bi bi-send"></i> Send
+                                    </button>
+                                ` : ''}
+                                ${sale.payment_status === 'Notified' ? `<span class="badge bg-info sale-status-pill">Sent</span>` : ''}
+                                ${sale.payment_status === 'Paid' ? `<span class="badge bg-success sale-status-pill">Paid</span>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `}).join('') || '<tr><td colspan="9" class="text-center text-muted py-4">No sales found</td></tr>';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function viewSale(id) {
+            try {
+                const response = await fetch(`${API_BASE}/sales/${id}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const sale = await response.json();
+                const jobOrder = sale.job_order;
+                const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+                const role = (user.role || '').toLowerCase();
+                
+                // Determine permissions: customers can record payment too
+                const canRecordPayment = role === 'admin' || role === 'staff' || role === 'customer';
+
+                // Update modal footer button visibility
+                document.getElementById('btnRecordPayment').style.display = (canRecordPayment && sale.payment_status !== 'Paid') ? 'inline-flex' : 'none';
+                document.getElementById('btnPrint').style.display = 'inline-flex';
+                
+                // Set current sale ID globally for actions
+                window.currentSaleId = id;
+                
+                // Build items HTML - include labor as first item
+                const fmt = (n) => `PHP ${(n || 0).toLocaleString(undefined, {minimumFractionDigits:2})}`;
+                let itemsHTML = '';
+                const laborCost = jobOrder?.labor_cost || 0;
+                if (laborCost > 0) {
+                    itemsHTML += `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 14px 20px;"><strong><i class="bi bi-hammer text-warning me-2"></i>Labor</strong></td>
+                            <td style="padding: 14px 12px; text-align: center;">1</td>
+                            <td style="padding: 14px 12px; text-align: right;">${fmt(laborCost)}</td>
+                            <td style="padding: 14px 20px; text-align: right; font-weight: 600;">${fmt(laborCost)}</td>
+                        </tr>`;
+                }
+                if (sale.items && sale.items.length > 0) {
+                    itemsHTML += sale.items.map(item => `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 14px 20px;">
+                                <div style="font-weight: 500; color: #0f0f10;">${escapeHtml(item.item_name)}</div>
+                                <span class="badge ${item.item_type === 'Service' ? 'bg-info' : 'bg-secondary'}" style="font-size: 0.7rem; margin-top: 4px;">${item.item_type || 'Part'}</span>
+                            </td>
+                            <td style="padding: 14px 12px; text-align: center;">${item.quantity}</td>
+                            <td style="padding: 14px 12px; text-align: right;">${fmt(item.unit_price || 0)}</td>
+                            <td style="padding: 14px 20px; text-align: right; font-weight: 600;">${fmt(item.total_price || 0)}</td>
+                        </tr>
+                    `).join('');
+                }
+                if (!laborCost && (!sale.items || sale.items.length === 0)) {
+                    itemsHTML = '<tr><td colspan="4" class="text-center text-muted py-4">No items</td></tr>';
+                }
+                
+                // Format date
+                const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+                
+                // Header
+                document.getElementById('saleModalInvoice').textContent = sale.invoice_number || '-';
+                document.getElementById('saleDetailInvoiceNum').textContent = sale.invoice_number || '-';
+                document.getElementById('saleDetailJobOrder').textContent = sale.job_order_number || '-';
+                
+                // Customer & Vehicle
+                document.getElementById('saleDetailCustomer').textContent = sale.customer_name || '-';
+                document.getElementById('saleDetailVehicle').textContent = sale.vehicle_info || '-';
+                document.getElementById('saleDetailPlate').textContent = sale.vehicle_plate || '-';
+                document.getElementById('saleDetailDate').textContent = formatDate(sale.created_at);
+                
+                // Status badge styling
+                const statusClass = {
+                    'Paid': 'status-paid',
+                    'Partial': 'status-partial',
+                    'Notified': 'status-notified',
+                    'Pending': 'status-pending'
+                }[sale.payment_status] || 'status-pending';
+                const statusBadge = document.getElementById('saleDetailStatusBadge');
+                const statusStyles = {
+                    'Paid': 'background: #10b981; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;',
+                    'Partial': 'background: #f59e0b; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;',
+                    'Notified': 'background: #3b82f6; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;',
+                    'Pending': 'background: #ef4444; color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;'
+                };
+                statusBadge.style.cssText = statusStyles[sale.payment_status] || statusStyles['Pending'];
+                statusBadge.textContent = sale.payment_status || '-';
+                
+                // Work details
+                const workSection = document.getElementById('workDetailsSection');
+                if (jobOrder?.diagnosis || jobOrder?.work_description || jobOrder?.mechanic_notes) {
+                    workSection.style.display = 'block';
+                    document.getElementById('saleDetailDiagnosis').innerHTML = jobOrder.diagnosis ? `<div class="mb-1"><strong>Diagnosis:</strong><br>${escapeHtml(jobOrder.diagnosis)}</div>` : '';
+                    document.getElementById('saleDetailWorkDesc').innerHTML = jobOrder.work_description ? `<div class="mb-1"><strong>Work Description:</strong><br>${escapeHtml(jobOrder.work_description)}</div>` : '';
+                    document.getElementById('saleDetailMechanicNotes').innerHTML = jobOrder.mechanic_notes ? `<div class="mb-0"><strong>Mechanic Notes:</strong><br>${escapeHtml(jobOrder.mechanic_notes)}</div>` : '';
+                } else {
+                    workSection.style.display = 'none';
+                }
+                
+                // Services as badges
+                const servicesContainer = document.getElementById('saleDetailServicesBadges');
+                const services = sale.services && sale.services.length > 0 ? sale.services : [];
+                if (services.length > 0) {
+                    servicesContainer.innerHTML = services.map(s => `<span class="badge bg-light text-dark border">${escapeHtml(s)}</span>`).join('');
+                } else {
+                    servicesContainer.innerHTML = '<span class="text-muted">No services</span>';
+                }
+                
+                // Items table
+                document.getElementById('saleDetailItems').innerHTML = itemsHTML;
+                
+                // Financial summary
+                document.getElementById('saleDetailSubtotal').textContent = fmt(sale.subtotal);
+                document.getElementById('saleDetailTotal').textContent = fmt(sale.total);
+                document.getElementById('saleDetailPaid').textContent = fmt(sale.amount_paid);
+                document.getElementById('saleDetailBalance').textContent = fmt(sale.balance_due);
+                
+                // Payment method
+                document.getElementById('saleDetailPaymentMethod').textContent = sale.payment_method || 'Not specified';
+
+                // Loyalty voucher applied to this sale, if any. Hidden
+                // entirely when there isn't one so the panel doesn't carry an
+                // empty "—" row on every invoice.
+                const voucherRow = document.getElementById('saleDetailVoucherRow');
+                if (sale.voucher_code) {
+                    voucherRow.style.display = 'block';
+                    document.getElementById('saleDetailVoucher').textContent =
+                        `${sale.voucher_code} (−PHP ${Number(sale.voucher_discount || 0).toLocaleString()})`;
+                } else {
+                    voucherRow.style.display = 'none';
+                }
+                
+                // Notes
+                const notesSection = document.getElementById('notesSection');
+                const notesText = sale.notes || '';
+                if (notesText.trim()) {
+                    notesSection.style.display = 'block';
+                    document.getElementById('saleDetailNotes').textContent = notesText;
+                } else {
+                    notesSection.style.display = 'none';
+                }
+                
+                // Payment notes section (if any)
+                const paymentNotesSection = document.getElementById('paymentNotesSection');
+                if (paymentNotesSection) {
+                    // Check if notes contain payment info (simple heuristic)
+                    if (notesText.toLowerCase().includes('payment:')) {
+                        paymentNotesSection.style.display = 'block';
+                        // Extract payment lines
+                        const paymentLines = notesText.split('\n').filter(line => line.toLowerCase().includes('payment:'));
+                        document.getElementById('saleDetailPaymentNotes').innerHTML = paymentLines.map(p => `<div class="mb-1 small">${escapeHtml(p)}</div>`).join('');
+                    } else {
+                        paymentNotesSection.style.display = 'none';
+                    }
+                }
+                
+                // Timestamps (admin only)
+                const timestampsSection = document.getElementById('timestampsSection');
+                if (timestampsSection && role === 'admin') {
+                    timestampsSection.style.display = 'flex';
+                    document.getElementById('saleCreatedAt').textContent = formatDate(sale.created_at);
+                    document.getElementById('saleUpdatedAt').textContent = formatDate(sale.updated_at);
+                } else if (timestampsSection) {
+                    timestampsSection.style.display = 'none';
+                }
+                
+                // Highlight outstanding balance
+                const balanceEl = document.getElementById('saleDetailBalance');
+                if (sale.balance_due > 0) {
+                    balanceEl.classList.add('text-danger');
+                    balanceEl.classList.add('fw-bold');
+                } else {
+                    balanceEl.classList.remove('text-danger', 'fw-bold');
+                }
+                
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Error loading sale:', error);
+                Swal.fire({
+                    title: 'Automan',
+                    text: 'Error loading sale details',
+                    icon: 'error'
+                });
+            }
+        }
+        
+        function recordPayment() {
+            const id = window.currentSaleId;
+            if (!id) return;
+            // Open a payment recording modal
+            const sale = salesList.find(s => s.id === id);
+            if (!sale) return;
+
+            // Pre-fill amount = balance due
+            const amountDue = sale.balance_due || 0;
+
+            // The sale-detail Bootstrap modal is still open behind this
+            // button. Bootstrap's modal keeps its own focus trap active
+            // (enforceFocus) that yanks keyboard focus back to itself
+            // whenever it lands on an element outside the modal — and
+            // SweetAlert2's popup is appended as a sibling of it, not a
+            // descendant, so every click/keystroke into these fields kept
+            // losing focus back to the modal underneath. Hide it first so
+            // there's only one focus owner while this form is up.
+            const detailModalEl = document.getElementById('saleDetailModal');
+            const detailModal = bootstrap.Modal.getInstance(detailModalEl);
+            detailModal?.hide();
+
+            Swal.fire({
+                title: 'Record Payment',
+                html: `
+                    <div class="text-start mb-3">
+                        <strong>Invoice:</strong> ${sale.invoice_number}<br>
+                        <strong>Total:</strong> PHP ${(sale.total || 0).toLocaleString()}<br>
+                        <strong>Balance Due:</strong> PHP ${amountDue.toLocaleString()}
+                    </div>
+                    <div class="text-start mb-2">
+                        <label class="form-label small fw-semibold mb-1" for="voucherCodeField">
+                            Apply voucher code (optional)
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="voucherCodeField" class="form-control text-uppercase"
+                                   placeholder="AMR-XXXXXXXX" autocomplete="off" maxlength="16">
+                            <button class="btn btn-outline-secondary" type="button" id="voucherCheckBtn">Check</button>
+                        </div>
+                        <div id="voucherPreview" class="form-text mt-1">
+                            From the customer's Rewards page. The discount is applied to this sale.
+                        </div>
+                    </div>
+                    <input type="number" id="paymentAmount" class="form-control" value="${amountDue}" min="0.01" step="100" required>
+                    <select id="paymentMethod" class="form-select mt-2">
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="GCash">GCash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Check">Check</option>
+                    </select>
+                    <input type="text" id="paymentRef" class="form-control mt-2" placeholder="Reference Number (optional)">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Save Payment',
+                didOpen: () => {
+                    // Live preview: re-check the code as staff type/paste it so
+                    // the discount (and the new balance) are visible before
+                    // anything is committed. The authoritative check is still
+                    // the one in preConfirm -- this is only for feedback.
+                    const field = document.getElementById('voucherCodeField');
+                    const preview = document.getElementById('voucherPreview');
+                    const checkBtn = document.getElementById('voucherCheckBtn');
+                    const amountInput = document.getElementById('paymentAmount');
+                    const originalAmount = Number(amountInput.value) || 0;
+
+                    field.addEventListener('input', () => {
+                        field.value = field.value.toUpperCase();
+                        preview.innerHTML = '<span class="text-muted">Checking...</span>';
+                    });
+
+                    const check = async () => {
+                        const code = field.value.trim();
+                        if (!code) {
+                            preview.innerHTML = 'From the customer\'s Rewards page. The discount is applied to this sale.';
+                            amountInput.value = originalAmount;
+                            return null;
+                        }
+                        preview.innerHTML = '<span class="text-muted">Checking...</span>';
+                        try {
+                            const response = await fetch(`${API_BASE}/loyalty/admin/vouchers/validate`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                                body: JSON.stringify({ code: code })
+                            });
+                            const data = await response.json();
+                            if (!data.valid) {
+                                preview.innerHTML = `<span class="text-danger">${escapeHtml(data.reason || 'Voucher is not valid')}</span>`;
+                                amountInput.value = originalAmount;
+                                return null;
+                            }
+                            const discount = Number(data.discount_amount || 0);
+                            if (discount > 0) {
+                                const newDue = Math.max(0, originalAmount - discount);
+                                preview.innerHTML = `<span class="text-success">${escapeHtml(data.reward_name || 'Voucher')} &mdash; PHP ${discount.toLocaleString()} off. New balance: PHP ${newDue.toLocaleString()}</span>`;
+                                amountInput.value = newDue;
+                            } else {
+                                preview.innerHTML = `<span class="text-success">${escapeHtml(data.reward_name || 'Voucher')} is valid (staff-delivered service)</span>`;
+                            }
+                            return data;
+                        } catch (error) {
+                            preview.innerHTML = `<span class="text-danger">Could not check the code: ${escapeHtml(error.message)}</span>`;
+                            return null;
+                        }
+                    };
+
+                    checkBtn.addEventListener('click', check);
+                    field.addEventListener('keydown', e => {
+                        if (e.key === 'Enter') { e.preventDefault(); check(); }
+                    });
+                    // Re-check on blur so a pasted code is validated even if
+                    // staff never press Check or Enter.
+                    field.addEventListener('blur', check);
+                },
+                preConfirm: async () => {
+                    const amount = parseFloat(document.getElementById('paymentAmount').value);
+                    const method = document.getElementById('paymentMethod').value;
+                    const ref = document.getElementById('paymentRef').value;
+                    const voucherCode = document.getElementById('voucherCodeField').value.trim().toUpperCase();
+                    if (!amount || amount <= 0) {
+                        Swal.showValidationMessage('Please enter a valid amount');
+                        return false;
+                    }
+                    // Re-validate authoritatively here. The live preview ran
+                    // outside any transaction and the code may have been
+                    // used at another counter since -- applying it is what
+                    // actually marks it used, so this is the check that
+                    // matters.
+                    if (voucherCode) {
+                        try {
+                            const response = await fetch(`${API_BASE}/loyalty/admin/vouchers/validate`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                                body: JSON.stringify({ code: voucherCode, sale_total: sale.total })
+                            });
+                            const data = await response.json();
+                            if (!data.valid) {
+                                Swal.showValidationMessage(data.reason || 'Voucher is not valid');
+                                return false;
+                            }
+                            return { amount, method, ref, voucherCode };
+                        } catch (error) {
+                            Swal.showValidationMessage('Could not check the voucher code');
+                            return false;
+                        }
+                    }
+                    return { amount, method, ref, voucherCode: '' };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitPayment(id, result.value);
+                } else {
+                    detailModal?.show();
+                }
+            });
+        }
+        
+        async function submitPayment(saleId, paymentData) {
+            try {
+                // Apply the voucher first, as its own request. It marks the
+                // voucher used atomically with the sale's discount/total
+                // update (see routes/sales.py), which then lowers what this
+                // payment has to settle.
+                if (paymentData.voucherCode) {
+                    const voucherResponse = await fetch(`${API_BASE}/sales/${saleId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ voucher_code: paymentData.voucherCode })
+                    });
+                    const voucherData = await voucherResponse.json().catch(() => ({}));
+                    if (!voucherResponse.ok) {
+                        Swal.fire('Voucher not applied', voucherData.error || 'Could not apply the voucher code', 'error');
+                        return;
+                    }
+                }
+
+                const response = await fetch(`${API_BASE}/sales/${saleId}/payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: paymentData.amount,
+                        payment_method: paymentData.method,
+                        reference_number: paymentData.ref
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Success',
+                        text: paymentData.voucherCode
+                            ? 'Voucher applied and payment recorded successfully'
+                            : 'Payment recorded successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        const modalEl = document.getElementById('saleDetailModal');
+                        bootstrap.Modal.getInstance(modalEl)?.hide();
+                        // The page could become entirely unclickable after this
+                        // (needing a manual refresh) if Bootstrap's backdrop or
+                        // body-lock state didn't get cleaned up — SweetAlert2's
+                        // own overlay stacking on top of an open Bootstrap modal
+                        // could leave one behind. Force a clean state regardless.
+                        setTimeout(() => {
+                            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                            document.body.classList.remove('modal-open');
+                            document.body.style.removeProperty('overflow');
+                            document.body.style.removeProperty('padding-right');
+                        }, 300);
+                        loadSales();
+                    });
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to record payment', 'error');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                Swal.fire('Error', 'Network error', 'error');
+            }
+        }
+        
+        function printInvoice() {
+            const id = window.currentSaleId;
+            if (!id) return;
+            window.print();
+        }
+        
+        async function sendPaymentLink(saleId) {
+            try {
+                const response = await fetch(`${API_BASE}/sales/${saleId}/send-payment-link`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Success',
+                        text: 'Payment sent to customer',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                    loadSales(); // refresh table to show "Sent" status
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to send payment link', 'error');
+                }
+            } catch (error) {
+                console.error('Send payment link error:', error);
+                Swal.fire('Error', 'Network error', 'error');
+            }
+        }
+
+        loadSales();
+    </script>
+</body>
+</html>

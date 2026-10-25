@@ -1,0 +1,661 @@
+/* Automan Unified Styles - Shared across all pages */
+
+/* ==================== CSS Variables ==================== */
+:root {
+    /* Primary Colors */
+    --primary-color: #0f0f10;
+    --primary-soft: #1a1a1d;
+    --secondary-color: #e53935;
+    --secondary-dark: #b71c1c;
+    --secondary-light: #ff6b6b;
+    
+    /* Status Colors */
+    --success-color: #10b981;
+    --success-soft: rgba(16, 185, 129, 0.15);
+    --info-color: #3b82f6;
+    --info-soft: rgba(59, 130, 246, 0.15);
+    --warning-color: #f59e0b;
+    --warning-soft: rgba(245, 158, 11, 0.15);
+    --danger-color: #ef4444;
+    --danger-soft: rgba(239, 68, 68, 0.15);
+    
+    /* Background & Text */
+    --bg-light: #f8fafc;
+    --bg-gradient: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    --text-dark: #1f2328;
+    --text-muted: #64748b;
+    --text-light: #f8f9fa;
+    
+    /* Border & Shadow */
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+    --shadow-lg: 0 12px 30px rgba(0,0,0,0.18);
+    --shadow-brand: 0 14px 40px rgba(0,0,0,0.18);
+    
+    /* Layout */
+    --sidebar-width: 260px;
+    --header-height: 60px;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+    --border-radius-lg: 16px;
+
+    /* Table Action Buttons */
+    --action-btn-padding: 0.375rem 0.75rem;
+    --action-btn-font-size: 0.875rem;
+}
+
+/* ==================== Base Styles ==================== */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+/* ==================== Sidebar ==================== */
+.sidebar {
+    background: linear-gradient(180deg, rgba(15,15,16,0.98), rgba(32,32,35,0.98));
+    border-right: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    min-height: 100vh;
+    color: white;
+    position: fixed;
+    width: var(--sidebar-width);
+    z-index: 1000;
+}
+
+.sidebar .brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar a {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    padding: 12px 20px;
+    display: block;
+    transition: all 0.3s ease;
+    border-radius: var(--border-radius-sm);
+    margin: 4px 12px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: linear-gradient(90deg, rgba(229,57,53,0.92), rgba(183,28,28,0.92));
+    color: white;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+}
+
+.sidebar .user-info {
+    background: rgba(255,255,255,0.05);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin: 0 12px 20px;
+}
+
+.sidebar .user-info .badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: capitalize;
+}
+
+/* ==================== Page Header ==================== */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-soft));
+    color: white;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-brand);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(229,57,53,0.3), transparent 70%);
+    pointer-events: none;
+}
+
+.page-header h3 {
+    font-weight: 600;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.page-header p {
+    opacity: 0.85;
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+/* ==================== Cards ==================== */
+.card {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    background: white;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* ==================== Stat Cards ==================== */
+.stat-card {
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    background: white;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card.success { border-left-color: var(--success-color); }
+.stat-card.warning { border-left-color: var(--warning-color); }
+.stat-card.danger { border-left-color: var(--danger-color); }
+.stat-card.info { border-left-color: var(--info-color); }
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.stat-icon.success { background: var(--success-soft); color: var(--success-color); }
+.stat-icon.warning { background: var(--warning-soft); color: var(--warning-color); }
+.stat-icon.info { background: var(--info-soft); color: var(--info-color); }
+.stat-icon.danger { background: var(--danger-soft); color: var(--danger-color); }
+.stat-icon.primary { background: rgba(229,57,53,0.15); color: var(--secondary-color); }
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* ==================== Buttons ==================== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(229,57,53,0.25);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(229,57,53,0.35);
+    background: linear-gradient(135deg, var(--secondary-dark), #8b1c1c);
+}
+
+.btn-secondary {
+    background: var(--primary-color);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    border: none;
+}
+
+.btn-success:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* ==================== Tables ==================== */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(229,57,53,0.04);
+}
+
+.table-responsive {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+/* ==================== Status Badges ==================== */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-pending { background: var(--warning-soft); color: #b45309; }
+.status-approved { background: var(--success-soft); color: #047857; }
+.status-rejected { background: var(--danger-soft); color: #b91c1c; }
+.status-cancelled { background: #f3f4f6; color: #4b5563; }
+.status-quotation-sent { background: var(--info-soft); color: #1d4ed8; }
+.status-in-progress { background: var(--info-soft); color: #1d4ed8; }
+.status-completed { background: var(--success-soft); color: #047857; }
+.status-paid { background: var(--success-soft); color: #047857; }
+.status-partial { background: var(--warning-soft); color: #b45309; }
+.status-notified { background: var(--info-soft); color: #1d4ed8; }
+
+/* ==================== Forms ==================== */
+.form-control,
+.form-select {
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(229,57,53,0.1);
+    outline: none;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+/* ==================== Modals ==================== */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border: none;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-header.bg-primary { background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark)); }
+.modal-header.bg-success { background: linear-gradient(135deg, var(--success-color), #059669); }
+
+/* ==================== Filters ==================== */
+.filter-row {
+    margin-bottom: 20px;
+}
+
+.filter-row .form-select {
+    max-width: 200px;
+}
+
+/* ==================== Loading ==================== */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+
+/* ==================== Mobile Responsive ==================== */
+@media (max-width: 991px) {
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        transition: left 0.3s ease;
+        padding-top: 20px;
+    }
+    
+    .sidebar.show {
+        left: 0;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+    
+    main {
+        margin-left: 0 !important;
+        padding: 20px;
+        padding-top: 4.5rem !important;
+    }
+    
+    .page-header {
+        margin: -20px -20px 20px -20px;
+        border-radius: 0;
+    }
+}
+
+/* Table Action Buttons Container - enhance Bootstrap's d-flex */
+.table td > .d-flex {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+    min-height: 32px;
+    vertical-align: middle;
+}
+
+/* Ensure buttons in action containers don't shrink or wrap text */
+.table td > .d-flex .btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.table-actions .btn,
+.table td > .d-flex .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Ensure table cells don't compress too much */
+.table th.actions-col,
+.table td.actions-col {
+    min-width: 160px;
+    width: 160px;
+    vertical-align: middle;
+}
+
+/* For tables with more buttons */
+.table th.actions-col-wide,
+.table td.actions-col-wide {
+    min-width: 200px;
+    width: 200px;
+    vertical-align: middle;
+}
+
+/* Also apply middle alignment to nth-child action columns */
+@media (max-width: 768px) {
+    .table th:nth-child(10),
+    .table td:nth-child(10),
+    .table th:nth-child(11),
+    .table td:nth-child(11),
+    .table th:last-child,
+    .table td:last-child {
+        vertical-align: middle;
+    }
+}
+
+/* Prevent text wrap in button */
+.table .btn-sm {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+/* Ensure status badges align properly */
+.table .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* General table cell vertical alignment for action buttons */
+.table td > .d-flex {
+    vertical-align: middle;
+    gap: 0.375rem;
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        margin-bottom: 15px;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Fix action buttons in table cells - prevent overlap */
+    .table td .btn {
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    /* Ensure Actions column is wide enough */
+    .table th:nth-child(10),
+    .table td:nth-child(10) {
+        min-width: 180px;
+        width: 180px;
+    }
+    
+    /* Job Orders table - 11 columns, actions is 11th */
+    .table th:nth-child(11),
+    .table td:nth-child(11) {
+        min-width: 200px;
+        width: 200px;
+    }
+    
+    /* Inventory table - actions column */
+    .table th:last-child,
+    .table td:last-child {
+        min-width: 160px;
+        width: 160px;
+    }
+    
+    /* Sales table - actions column */
+    .table th:last-child,
+    .table td:last-child {
+        min-width: 140px;
+        width: 140px;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Even tighter for very small screens */
+    .table td .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.7rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .table-sm .btn-sm {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.35rem;
+    }
+    
+    /* Stack buttons vertically on extra small screens if needed */
+    .table-responsive-stack .btn-group-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+/* ==================== Animations ==================== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .stat-card {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+/* ==================== Empty States ==================== */
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-center.text-muted {
+    padding: 40px 20px;
+}
+
+/* ==================== Utility Classes ==================== */
+.ms-sm-auto {
+    margin-left: auto;
+}
+
+.px-md-4 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.pt-4 {
+    padding-top: 1.5rem !important;
+}
+
+.pt-md-5 {
+    padding-top: 3rem !important;
+}
+
+@media (min-width: 768px) {
+    .pt-md-5 {
+        padding-top: 3rem !important;
+    }
+}
+
+/* Mobile header spacing */
+@media (max-width: 767px) {
+    main.col-md-9.col-lg-10.ms-sm-auto {
+        padding-top: 4rem !important;
+    }
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+/* Desktop main content margin to account for fixed sidebar */
+@media (min-width: 992px) {
+    .main-content {
+        margin-left: 260px;
+    }
+}

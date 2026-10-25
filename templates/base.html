@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Automan Car Care Center - Professional automotive services">
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <title>{% block title %}Automan Car Care Center{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Responsive Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --secondary-color: #e53935;
+            --secondary-light: #ff6b6b;
+            --accent-color: #e53935;
+            --success-color: #10b981;
+            --success-light: #34d399;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8f9fa;
+            --header-height: 3.75rem;
+            --sidebar-width: 14rem;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+            --shadow-brand: 0 10px 25px rgba(229,57,53,0.25);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0f0f10 0%, #1a1a1d 100%);
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .sidebar-brand {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: linear-gradient(135deg, rgba(229,57,53,0.1), transparent);
+        }
+        
+        .sidebar-brand h4 {
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #fff, #e53935);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .sidebar a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            padding: 0.875rem 1.25rem;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 0 8px 8px 0;
+            margin: 4px 8px;
+            font-weight: 500;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: white;
+            border-left-color: #fff;
+            transform: translateX(4px);
+            box-shadow: var(--shadow-brand);
+        }
+        
+        .sidebar a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .sidebar-user-info .user-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-user-info .user-role {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+        }
+        
+        .sidebar-logout {
+            margin: 1rem;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-logout:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .navbar {
+            background-color: white;
+            box-shadow: var(--shadow-sm);
+            padding: 0.25rem 1.25rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card-header {
+            background: white;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .stat-card {
+            border-left: 4px solid var(--secondary-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, transparent, rgba(229,57,53,0.05));
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+        
+        .stat-card.success { border-left-color: var(--success-color); }
+        .stat-card.warning { border-left-color: var(--warning-color); }
+        .stat-card.danger { border-left-color: var(--accent-color); }
+        .stat-card.info { border-left-color: var(--info-color); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ef4444, #b71c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 57, 53, 0.4);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268, #343a40);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #34d399, #059669);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-color), #2563eb);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+        }
+        
+        .table-responsive {
+            border-radius: var(--border-radius);
+            overflow: auto;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .table tbody tr:hover {
+            background: linear-gradient(135deg, rgba(229,57,53,0.03), rgba(229,57,53,0.08));
+            transform: translateX(4px);
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+        
+        .status-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            text-transform: capitalize;
+        }
+        
+        .status-pending { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .status-approved { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
+        .status-rejected { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; }
+        .status-cancelled { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); color: #374151; }
+        .status-in-progress { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
+        .status-completed { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
+        .status-paid { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
+        .status-partial { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        
+        .page-header {
+            background: linear-gradient(135deg, #0f0f10 0%, #1a1a1d 50%, #2c1012 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(229,57,53,0.2), transparent 70%);
+            transform: translate(30%, -30%);
+        }
+        
+        .page-header h1, .page-header h2, .page-header h3 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-header p {
+            opacity: 0.85;
+            margin-bottom: 0;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.15);
+            outline: none;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .mobile-nav-toggler {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: #0f0f10;
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(4px);
+        }
+        
+        .mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color), #1a1a1d);
+            padding: 0 1rem;
+            box-shadow: var(--shadow-md);
+            z-index: 100;
+        }
+        
+        .mobile-header .brand {
+            color: white;
+            font-weight: 700;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .mobile-header .btn {
+            padding: 0.5rem;
+            min-width: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .empty-state {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: #94a3b8;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            display: block;
+        }
+        
+        @media (max-width: 991px) {
+            body {
+                padding-top: var(--header-height);
+            }
+            
+            .mobile-nav-toggler {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: var(--header-height);
+                left: -100%;
+                width: 280px;
+                height: calc(100vh - var(--header-height));
+                z-index: 1000;
+                padding: 1rem 0;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .sidebar-overlay.show {
+                display: block;
+            }
+            
+            .sidebar a {
+                padding: 0.875rem 1.25rem;
+            }
+            
+            main {
+                margin-top: 1rem;
+                padding: 0 1rem;
+            }
+            
+            .btn-mobile-full {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+                border-radius: 0.75rem;
+            }
+            
+            .page-header h1,
+            .page-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .page-header p {
+                font-size: 0.875rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+                border-radius: 0.75rem;
+            }
+            
+            .form-control {
+                font-size: 1rem;
+            }
+            
+            .table {
+                font-size: 0.85rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.625rem 0.75rem;
+            }
+            
+            .status-badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.625rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-header {
+                padding: 1rem;
+                border-radius: 0.625rem;
+            }
+            
+            .page-header h1,
+            .page-header h2,
+            .page-header h3 {
+                font-size: 1.25rem;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .mobile-header {
+                display: none;
+            }
+        }
+    </style>
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    {% if current_user %}
+    <!-- Mobile Header -->
+    <header class="mobile-header d-lg-none fixed-top">
+        <button class="mobile-nav-toggler" onclick="toggleSidebar()" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+        <span class="header-brand"><img src="{{ url_for('static', filename='images/automan-logo.png') }}" alt="Logo" class="header-brand-logo">Automan</span>
+        <div class="header-brand-spacer"></div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebarMenu">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4 d-none d-lg-block">
+                        <img src="{{ url_for('static', filename='images/automan-logo.png') }}" alt="Automan Logo" class="sidebar-logo"><small class="text-light d-block">Car Care Center</small>
+                    </div>
+                    <hr class="d-none d-lg-block">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-speedometer2 me-2"></i> <span>Dashboard</span>
+                            </a>
+                        </li>
+                        {% if current_user.role in ['admin', 'staff'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/appointments" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-calendar-check me-2"></i> <span>Appointments</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if current_user.role in ['admin', 'staff', 'mechanic'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/job-orders" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-clipboard-check me-2"></i> <span>Job Orders</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if current_user.role in ['admin', 'staff'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/inventory" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-box-seam me-2"></i> <span>Inventory</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/sales" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-receipt me-2"></i> <span>Sales</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/customers" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-people me-2"></i> <span>Customers</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if current_user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/users" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-person-gear me-2"></i> <span>Users</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if current_user.role in ['admin', 'staff'] %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/reports" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-bar-chart me-2"></i> <span>Reports</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/forecast" onclick="closeSidebarOnMobile()">
+                                <i class="bi bi-graph-up-arrow me-2"></i> <span>Restocking Forecast</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                    <div class="text-center">
+                        <small>Logged in as:</small><br>
+                        <strong>{{ current_user.full_name }}</strong>
+                        <br><span class="badge bg-secondary">{{ current_user.role }}</span>
+                    </div>
+                    <hr>
+                    <button class="btn btn-outline-light w-100" onclick="logout()">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-4 mt-lg-0">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    {% else %}
+    {% block login_content %}{% endblock %}
+    {% endif %}
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Global variables
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+        
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebarMenu');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) {
+                sidebar.classList.toggle('show');
+            }
+            if (overlay) {
+                overlay.classList.toggle('show');
+            }
+        }
+        
+        function closeSidebarOnMobile() {
+            if (window.innerWidth < 992) {
+                toggleSidebar();
+            }
+        }
+        
+        // Auth helpers
+        function setAuth(token) {
+            authToken = token;
+            sessionStorage.setItem('token', token);
+        }
+        
+        function clearAuth() {
+            authToken = null;
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('session_id');
+            sessionStorage.removeItem('user');
+        }
+        
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': authToken ? `Bearer ${authToken}` : ''
+            };
+        }
+        
+        // API helpers
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE}${endpoint}`;
+            const config = {
+                ...options,
+                headers: {
+                    ...getAuthHeaders(),
+                    ...options.headers
+                }
+            };
+            
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    const msg = (data.error || data.msg || '').toString().toLowerCase();
+                    if (response.status === 401 || response.status === 422) {
+                        if (msg.includes('authorization') || msg.includes('token') || msg.includes('signature')) {
+                            logout();
+                            throw new Error('Session expired. Please login again.');
+                        }
+                    }
+                    throw new Error(data.error || 'Something went wrong');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+        
+        // Logout
+        function logout() {
+            clearAuth();
+            window.location.href = '/login';
+        }
+        
+        // Check auth on page load
+        function checkAuth() {
+            const user = sessionStorage.getItem('user');
+            if (!authToken || !user) {
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+        
+        // Get current user
+        function getCurrentUser() {
+            const user = sessionStorage.getItem('user');
+            return user ? JSON.parse(user) : null;
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
+            
+            const alert = `<div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+            
+            const container = document.querySelector('.container');
+            if (container) {
+                container.insertAdjacentHTML('afterbegin', alert);
+                setTimeout(() => container.querySelector('.alert')?.remove(), 5000);
+            }
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return 'PHP ' + parseFloat(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+        
+        // Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        
+        // Format datetime
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        
+        {% block extra_js %}{% endblock %}
+    </script>
+</body>
+</html>

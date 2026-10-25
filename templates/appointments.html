@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --secondary-color: #e53935;
+            --secondary-light: #ff6b6b;
+            --success-color: #10b981;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-light: #f8fafc;
+            --border-radius: 14px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+            --shadow-brand: 0 10px 25px rgba(229,57,53,0.25);
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a68;
+            --text-muted: #6b7280;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            background: var(--primary-color);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+            color: white;
+            z-index: 10;
+        }
+
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 12px;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), #ff6b6b);
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+        }
+
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 0 12px 20px;
+        }
+
+        .user-info .badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: calc(100% - 280px);
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            display: block !important;
+        }
+
+        .table-responsive > .table {
+            width: 100%;
+            min-width: 1000px;
+            margin-bottom: 0;
+        }
+
+        .table-responsive > .table > thead > tr > th:first-child,
+        .table-responsive > .table > tbody > tr > td:first-child {
+            padding-left: 1.5rem !important;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), #2d2d30);
+            color: white;
+            padding: 24px 28px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+    .page-header h3 { font-weight: 600; margin-bottom: 0; color: #ffffff; }
+    .page-header p  { opacity: 0.85; margin-bottom: 0; margin-top: 5px; font-size: 0.9rem; color: #ffffff; }
+    .page-header i  { color: #ffffff; }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            background: white;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+        .card-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            background: white;
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+         .card-body { padding: 1.5rem; }
+
+         .table thead th {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tbody tr:hover {
+            background: linear-gradient(135deg, rgba(229,57,53,0.03), rgba(229,57,53,0.08));
+            transform: translateX(4px);
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            text-transform: capitalize;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-cancelled { background: #f3f4f6; color: #374151; }
+        .status-quotation-sent { background: #dbeafe; color: #1e40af; }
+
+        /* "Job Order Created" / "Awaiting Customer Response" / "Rejected"
+           sit in the actions column next to real buttons (View, Approve,
+           Reject) that design-system.css sizes to a 40px min-height — a
+           plain .badge is much smaller by default and looked out of place
+           next to them. Match the button's actual size. */
+        .action-status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 0.52rem 1rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .notes-cell { min-width: 120px; }
+        .notes-cell div { font-size: 0.85rem; margin-bottom: 2px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ef4444, #b71c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 57, 53, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-color), #2563eb);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            margin: 0 12px;
+            border-radius: 0.625rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: white;
+        }
+
+        .filter-row { padding: 0 0 1.5rem 0; }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            padding: 0.625rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.15);
+            outline: none;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .modal-header .btn-close { filter: invert(1); }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0; }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show { display: block; }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+
+            .layout-container { flex-direction: column; }
+
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: 280px !important;
+            }
+
+            .sidebar.show { transform: translateX(0) !important; }
+
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding-top: 1rem;
+            }
+
+            .page-header { padding: 1.25rem 1rem; border-radius: 12px; }
+            .page-header h3 { font-size: 1.3rem; }
+            .card { margin-bottom: 1rem; border-radius: 12px; }
+            .table th, .table td { padding: 0.5rem 0.75rem; font-size: 0.75rem; }
+            .status-badge { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+            .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.7rem; }
+
+            .table th:nth-child(10),
+            .table td:nth-child(10) {
+                min-width: 160px !important;
+                width: 160px !important;
+                vertical-align: middle !important;
+            }
+        }
+
+        /* Brand-styled SweetAlert popups (quotation form, confirmations) */
+        .swal2-popup {
+            font-family: 'Manrope', 'Segoe UI', sans-serif !important;
+            border-radius: 14px !important;
+        }
+        .swal2-title { color: #151a21 !important; }
+        .swal2-confirm {
+            background: linear-gradient(135deg, #e53935, #c62828) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+        }
+        .swal2-confirm:focus { box-shadow: 0 0 0 3px rgba(229, 57, 53, .3) !important; }
+        .swal2-cancel { border-radius: 8px !important; }
+        .swal-helper { color: #6b7280; }
+    </style>
+
+    <script>
+        window.onload = function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        };
+
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.scrollTo(0, 0);
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+
+            <nav id="sidebarNav"></nav>
+
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3><i class="bi bi-calendar-check me-2"></i>Appointments</h3>
+                        <p class="page-subtitle">Manage customer appointments</p>
+                    </div>
+                    <button class="btn btn-light" onclick="new bootstrap.Modal(document.getElementById('appointmentModal')).show(); loadCustomers(); loadServices();">
+                        <i class="bi bi-plus-circle me-2"></i>New Appointment
+                    </button>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row mb-3 filter-row">
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="filterDate" onchange="loadAppointments()" placeholder="Filter by date">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="filterStatus" onchange="loadAppointments()">
+                                <option value="">All Status</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Quotation Sent">Quotation Sent</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Customer</th>
+                                    <th>Vehicle</th>
+                                    <th>Plate #</th>
+                                    <th>Services</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th style="min-width:150px;">Notes</th>
+                                    <th>Estimate</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTable">
+                                <tr><td colspan="11" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-calendar-plus me-2"></i>Book Appointment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm" onsubmit="return false;">
+                        <div class="mb-3">
+                            <label class="form-label">Customer</label>
+                            <select class="form-select" id="aptCustomerId" required onchange="loadCustomerVehicles()">
+                                <option value="">Select Customer</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Vehicle</label>
+                            <select class="form-select" id="aptVehicleId">
+                                <option value="">Select Vehicle (or enter plate below)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Identifier Type</label>
+                            <select class="form-select form-select-sm mb-2" id="aptIdentifierType" onchange="updateAptPlateLabel()">
+                                <option value="plate_number" selected>Plate Number</option>
+                                <option value="conduction_sticker">Conduction Sticker</option>
+                            </select>
+                            <input type="text" class="form-control" id="aptPlateNumber" placeholder="Enter plate number (e.g., ABC-1234)" maxlength="8">
+                            <small class="text-muted">Only needed for walk-ins without a vehicle on file above.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Services</label>
+                            <select class="form-select" id="aptServices" multiple size="4">
+                                <option value="">-- Select Services --</option>
+                            </select>
+                            <small class="text-muted">Hold Ctrl/Cmd to select multiple</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Preferred Date</label>
+                                <input type="date" class="form-control" id="aptDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Preferred Time</label>
+                                <select class="form-select" id="aptTime" required>
+                                    <option value="">Select Time</option>
+                                    <option value="08:00">8:00 AM</option>
+                                    <option value="09:00">9:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                </select>
+                                <small id="aptSlotAvailability" class="form-text text-muted">Select a date to view slot availability (staff override remains available).</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" id="aptContactNumber" placeholder="Enter contact number">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" id="aptNotes" rows="3" placeholder="Any special requests or notes..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createAppointment()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Job Order Modal -->
+    <div class="modal fade" id="jobOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-clipboard-check me-2"></i>Create Job Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Appointment ID</label>
+                        <input type="text" class="form-control" id="joAppointmentId" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Assign Mechanic <span class="text-danger">*</span></label>
+                        <select class="form-select" id="joMechanicId" required>
+                            <option value="">-- Select Mechanic --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Priority</label>
+                        <select class="form-select" id="joPriority">
+                            <option value="Normal">Normal</option>
+                            <option value="Low">Low</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Notes</label>
+                        <textarea class="form-control" id="joNotes" rows="2" placeholder="Optional notes for the mechanic"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeJobOrderModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createJobOrderFromModal()">
+                        <i class="bi bi-check-circle me-1"></i> Create Job Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REJECTION_REASONS = {
+            'No mechanic available': 'No mechanic is currently available for your requested schedule. Please contact us to choose another available time.',
+            'Service unavailable': 'The requested service is currently unavailable. Please contact us so we can discuss available alternatives.',
+            'Customer requested unavailable service': 'The requested service is not currently offered. Please contact us so we can recommend an available service.',
+            'Vehicle/service requires prior inspection': 'Your vehicle or requested service requires a prior inspection before we can confirm an appointment.',
+            'Parts unavailable': 'Required parts are currently unavailable. Please contact us to arrange another schedule.',
+            'Shop closed': 'The shop is closed at the requested time. Please select another appointment schedule.',
+            'Other': ''
+        };
+
+        async function rejectAppointment(id) {
+            const responses = REJECTION_REASONS;
+            const result = await Swal.fire({
+                title: 'Reject Appointment',
+                html: `
+                    <div class="swal-form-row">
+                        <label class="swal-label">Select Rejection Reason</label>
+                        <select id="rejectionReason" class="swal-select"><option value="">Select a reason</option>${Object.keys(responses).map(reason => `<option value="${reason}">${reason}</option>`).join('')}</select>
+                    </div>
+                    <div class="swal-form-row">
+                        <textarea id="rejectionMessage" class="swal-textarea" placeholder="Response loads after selecting a reason"></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Reject',
+                cancelButtonText: 'Cancel',
+                didOpen: () => document.getElementById('rejectionReason').addEventListener('change', event => { document.getElementById('rejectionMessage').value = responses[event.target.value] || ''; }),
+                preConfirm: () => {
+                    const reason = document.getElementById('rejectionReason').value;
+                    const message = document.getElementById('rejectionMessage').value.trim();
+                    if (!reason) { Swal.showValidationMessage('Select a rejection reason'); return false; }
+                    if (!message) { Swal.showValidationMessage('Enter a customer-facing response'); return false; }
+                    return { reason, message };
+                }
+            });
+
+            if (!result.isConfirmed) return;
+
+            const reasonText = result.value.message;
+
+            try {
+                const response = await fetch('/api/appointments/' + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+                    },
+                    body: JSON.stringify({ status: 'Rejected', reason: reasonText, rejection_reason: result.value.reason })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.sms_sent === true) {
+                        Swal.fire({ title: 'Rejected', text: 'Appointment rejected. Customer has been notified via SMS', icon: 'success' });
+                    } else if (data.sms_sent === false) {
+                        Swal.fire({ title: 'Rejected (SMS Failed)', text: `Appointment rejected. However, SMS failed to send: ${data.sms_error || 'Unknown error'}. Please notify customer manually.`, icon: 'warning' });
+                    } else {
+                        Swal.fire({ title: 'Rejected', text: 'Appointment rejected. Customer has been notified via SMS', icon: 'success' });
+                    }
+                    loadAppointments();
+                } else {
+                    Swal.fire({ title: 'Error', text: data.error || JSON.stringify(data), icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Error', text: 'Error rejecting appointment: ' + error.message, icon: 'error' });
+            }
+        }
+
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+
+        if (!authToken) {
+            window.location.href = '/login';
+        }
+
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (!['admin', 'staff'].includes(user.role)) window.location.href = user.role === 'customer' ? '/customer' : '/dashboard';
+
+        buildSidebar();
+
+        async function loadAppointments() {
+            try {
+                const status = document.getElementById('filterStatus').value;
+                const date = document.getElementById('filterDate').value;
+
+                let url = `${API_BASE}/appointments`;
+                const params = [];
+                if (status) params.push(`status=${status}`);
+                if (date) params.push(`date=${date}`);
+                if (params.length > 0) url += '?' + params.join('&');
+
+                const response = await fetch(url, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const responseData = await response.json();
+                if (!response.ok) {
+                    throw new Error(responseData.error || `Failed to load appointments (${response.status})`);
+                }
+                const appointments = Array.isArray(responseData) ? responseData : [];
+
+                document.getElementById('appointmentsTable').innerHTML = appointments.map(apt => {
+                    const services = apt.services || [];
+                    const packages = apt.packages || [];
+                    const servicesList = (services.length > 0 || packages.length > 0)
+                        ? [...packages.map(p => `${escapeHtml(p.name)} (Package)`), ...services.map(s => escapeHtml(s.name))].join(', ')
+                        : 'No services selected';
+                    const customerNotes = apt.customer_notes ? apt.customer_notes : '';
+                    const staffNotes = apt.notes ? apt.notes : '';
+                    let notesDisplay = '<div class="notes-cell">';
+                    if (customerNotes) {
+                        notesDisplay += `<div title="Customer Notes">${escapeHtml(customerNotes.substring(0, 30))}${customerNotes.length > 30 ? '...' : ''}</div>`;
+                    }
+                    if (staffNotes) {
+                        notesDisplay += `<div title="Staff Notes">${escapeHtml(staffNotes.substring(0, 30))}${staffNotes.length > 30 ? '...' : ''}</div>`;
+                    }
+                    notesDisplay += '</div>';
+                    if (!customerNotes && !staffNotes) notesDisplay = '-';
+
+                    let timeDisplay = '-';
+                    if (apt.preferred_time) {
+                        const [h, m] = apt.preferred_time.split(':');
+                        const hour = parseInt(h);
+                        timeDisplay = `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+                    }
+
+                    return `
+                    <tr>
+                        <td>${escapeHtml(apt.appointment_number || '—')}</td>
+                        <td>${escapeHtml(apt.customer?.name || 'N/A')}</td>
+                        <td>${escapeHtml(apt.vehicle?.make || '')} ${escapeHtml(apt.vehicle?.model || '')}</td>
+                        <td>${escapeHtml(apt.plate_number || '-')}</td>
+                        <td>${servicesList}</td>
+                        <td>${apt.preferred_date || '-'}</td>
+                        <td>${timeDisplay}</td>
+                        <td>${notesDisplay}</td>
+                        <td>${apt.min_estimate && apt.max_estimate ? 
+                            `PHP ${apt.min_estimate.toLocaleString()} - ${apt.max_estimate.toLocaleString()}` : 
+                            `PHP ${(apt.service_estimate || 0).toLocaleString()}`}</td>
+                        <td><span class="status-badge status-${apt.status.toLowerCase().replace(' ', '-')}">${apt.status}</span></td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                ${apt.status === 'Pending' ? `
+                                    <button class="btn btn-sm btn-info" onclick="sendQuotation('${apt.id}')">
+                                        <i class="bi bi-send"></i> Send Quotation
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="rejectAppointment('${apt.id}')">Reject</button>
+                                ` : ''}
+                                ${apt.status === 'Quotation Sent' ? `
+                                    <span class="badge bg-warning action-status-pill">Awaiting Customer Response</span>
+                                ` : ''}
+                                ${apt.status === 'Approved' && !apt.has_job_order ? `<a href="/job-orders" class="btn btn-sm btn-primary">Create Job Order</a>` : ''}
+                                ${apt.status === 'Approved' && apt.has_job_order ? `<span class="badge bg-success action-status-pill">Job Order Created</span>` : ''}
+                                ${apt.status === 'Rejected' ? `<span class="badge bg-secondary action-status-pill">Rejected</span>` : ''}
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('') || '<tr><td colspan="10" class="text-center text-muted">No appointments</td></tr>';
+            } catch (error) {
+                console.error('Error:', error);
+                // Was previously silent — the table stayed on its initial
+                // "Loading..." placeholder forever with no indication anything
+                // had failed. Always resolve to something visible.
+                document.getElementById('appointmentsTable').innerHTML =
+                    `<tr><td colspan="10" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load appointments: ${error.message}</td></tr>`;
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/customers`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const customers = await response.json();
+
+                const select = document.getElementById('aptCustomerId');
+                select.innerHTML = '<option value="">Select Customer</option>' +
+                    customers.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        async function loadServices() {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/services`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const services = await response.json();
+
+                const select = document.getElementById('aptServices');
+                select.innerHTML = '<option value="">-- Select Services --</option>' +
+                    services.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading services:', error);
+            }
+        }
+
+        async function loadCustomerVehicles() {
+            const customerId = document.getElementById('aptCustomerId').value;
+            if (!customerId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/appointments/vehicles?customer_id=${customerId}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const data = await response.json();
+
+                const vehicles = Array.isArray(data) ? data : (data.vehicles || []);
+
+                document.getElementById('aptVehicleId').innerHTML = '<option value="">Select Vehicle</option>' +
+                    vehicles.map(v => `<option value="${v.id}">${escapeHtml(v.make)} ${escapeHtml(v.model)}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+            }
+        }
+
+        function updateAptPlateLabel() {
+            const type = document.getElementById('aptIdentifierType').value;
+            const input = document.getElementById('aptPlateNumber');
+            input.placeholder = type === 'conduction_sticker'
+                ? 'Enter conduction sticker no. (e.g., CS-000123)'
+                : 'Enter plate number (e.g., ABC-1234)';
+        }
+
+        async function loadStaffSlotAvailability(date) {
+            const availability = document.getElementById('aptSlotAvailability');
+            if (!date) {
+                availability.textContent = 'Select a date to view slot availability (staff override remains available).';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/appointments/availability?date=${date}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (!response.ok) {
+                    availability.textContent = 'Unable to load slot availability.';
+                    return;
+                }
+
+                const data = await response.json();
+                const slots = (data.slots || []).map(slot => {
+                    const state = slot.is_past ? ' (past)' : slot.is_full ? ' (full)' : '';
+                    return `${slot.time} ${slot.booked}/${slot.capacity}${state}`;
+                }).join(' • ');
+                availability.textContent = `Availability: ${slots}`;
+            } catch (error) {
+                console.error('Error loading staff slot availability:', error);
+                availability.textContent = 'Unable to load slot availability.';
+            }
+        }
+
+        document.getElementById('aptDate').addEventListener('change', event => {
+            loadStaffSlotAvailability(event.target.value);
+        });
+
+        async function createAppointment() {
+            const selectedServices = Array.from(document.getElementById('aptServices').selectedOptions).map(opt => opt.value);
+
+            const data = {
+                customer_id: document.getElementById('aptCustomerId').value,
+                vehicle_id: document.getElementById('aptVehicleId').value || null,
+                plate_number: document.getElementById('aptPlateNumber').value,
+                preferred_date: document.getElementById('aptDate').value,
+                preferred_time: document.getElementById('aptTime').value,
+                customer_notes: document.getElementById('aptNotes').value,
+                service_ids: selectedServices
+            };
+
+            const contactNumber = document.getElementById('aptContactNumber').value;
+            if (contactNumber) {
+                data.contact_number = contactNumber;
+            }
+
+            if (!data.customer_id || (!data.vehicle_id && !data.plate_number) || !data.preferred_date || !data.preferred_time) {
+                Swal.fire({ title: 'Automan', text: 'Please fill in all required fields', icon: 'warning' });
+                return;
+            }
+
+            if (selectedServices.length === 0) {
+                Swal.fire({ title: 'Automan', text: 'Please select at least one service', icon: 'warning' });
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/appointments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    Swal.fire({ title: 'Automan', text: 'Appointment created successfully! SMS notification sent.', icon: 'success' });
+                    loadAppointments();
+                    bootstrap.Modal.getInstance(document.getElementById('appointmentModal')).hide();
+                    document.getElementById('appointmentForm').reset();
+                } else {
+                    const error = await response.json();
+                    Swal.fire({ title: 'Automan', text: error.error || 'Failed to create appointment', icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error creating appointment', icon: 'error' });
+            }
+        }
+
+        async function sendQuotation(id) {
+            const [appointment, pricingSettings] = await Promise.all([
+                fetch(`${API_BASE}/appointments/${id}`, { headers: { 'Authorization': `Bearer ${authToken}` } }).then(r => r.json()),
+                fetch(`${API_BASE}/appointments/pricing-settings`, { headers: { 'Authorization': `Bearer ${authToken}` } }).then(r => r.ok ? r.json() : { quotation_markup: 0 })
+            ]);
+            const services = appointment.services || [];
+            const packages = appointment.packages || [];
+            const servicesList = (services.length > 0 || packages.length > 0)
+                ? [...packages.map(p => `${escapeHtml(p.name)} (Package)`), ...services.map(s => escapeHtml(s.name))].join(', ')
+                : 'No services selected';
+            const customerNotes = escapeHtml(appointment.notes || '');
+            const suggestedEstimate = appointment.suggested_estimate || 0;
+            const markup = pricingSettings.quotation_markup || 0;
+            const suggestedMax = suggestedEstimate + markup;
+            const sizeClassLabel = { small: 'Small', midsize: 'Midsize', large: 'Large' }[appointment.vehicle_size_class] || 'Midsize';
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Send Quotation',
+                html: `
+                    <div class="swal-services">
+                        <strong>Services:</strong> ${servicesList}
+                    </div>
+
+                    <div class="swal-form-row-sm">
+                        <strong>Auto-calculated estimate (${sizeClassLabel} vehicle):</strong> PHP ${suggestedEstimate.toLocaleString()}
+                    </div>
+
+                    <div class="swal-form-row">
+                        <label class="swal-label">Price Range (PHP)</label>
+                        <div class="swal-range-wrap">
+                            <input type="number" id="swal-min_estimate" placeholder="Min" step="100" class="swal-range-input" value="${suggestedEstimate || ''}">
+                            <span class="swal-muted">to</span>
+                            <input type="number" id="swal-max_estimate" placeholder="Max" step="100" class="swal-range-input" value="${suggestedMax || ''}">
+                        </div>
+                    </div>
+
+                    ${customerNotes ? `<div class="swal-form-row-sm"><strong>Customer Notes:</strong> ${customerNotes}</div>` : ''}
+                    
+                    <div class="swal-form-row">
+                        <label class="swal-label">Additional Notes</label>
+                        <textarea id="swal-notes" placeholder="Optional notes..." class="swal-notes"></textarea>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Send',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                width: '380px',
+                preConfirm: () => {
+                    const minVal = document.getElementById('swal-min_estimate').value;
+                    const maxVal = document.getElementById('swal-max_estimate').value;
+                    const notesVal = document.getElementById('swal-notes').value;
+
+                    if (minVal && maxVal && parseFloat(minVal) > parseFloat(maxVal)) {
+                        Swal.showValidationMessage('Min cannot be greater than Max');
+                        return false;
+                    }
+
+                    return { min_estimate: minVal, max_estimate: maxVal, notes: notesVal };
+                }
+            });
+
+            if (!formValues) return;
+
+            const min_estimate = formValues.min_estimate;
+            const max_estimate = formValues.max_estimate;
+            const notes = formValues.notes ? formValues.notes.trim() : '';
+
+            try {
+                const response = await fetch(`${API_BASE}/appointments/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ 
+                        status: 'Quotation Sent', 
+                        min_estimate: parseFloat(min_estimate) || 0,
+                        max_estimate: parseFloat(max_estimate) || 0,
+                        notes: notes
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.sms_sent === true) {
+                        Swal.fire({ title: 'Automan', text: 'Quotation sent! SMS notification with approval link has been sent to the customer.', icon: 'success' });
+                    } else if (data.sms_sent === false) {
+                        Swal.fire({ title: 'Automan (SMS Failed)', text: 'Quotation saved, but SMS failed to send. Please notify customer manually.', icon: 'warning' });
+                    } else {
+                        Swal.fire({ title: 'Automan', text: 'Quotation sent!', icon: 'success' });
+                    }
+                    loadAppointments();
+                } else {
+                    Swal.fire({ title: 'Error', text: data.error || 'Failed to send quotation', icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Error', text: 'Error sending quotation: ' + error.message, icon: 'error' });
+            }
+        }
+
+        async function updateAppointment(id, status) {
+            let service_estimate = '0';
+            let rejectionReason = '';
+            if (status === 'Rejected') {
+                const reasons = REJECTION_REASONS;
+                const { value } = await Swal.fire({
+                    title: 'Reject Appointment', input: 'select', inputOptions: reasons,
+                    inputPlaceholder: 'Select rejection reason', showCancelButton: true,
+                    preConfirm: (reason) => {
+                        if (!reason) { Swal.showValidationMessage('Select a rejection reason'); return false; }
+                        return reason;
+                    }
+                });
+                if (!value) return;
+                const { value: message } = await Swal.fire({ title: 'Customer message', input: 'textarea', inputValue: reasons[value], showCancelButton: true, inputPlaceholder: 'Message to customer' });
+                if (message === undefined) return;
+                rejectionReason = message;
+            }
+            if (status === 'Approved') {
+                const appointment = await fetch(`${API_BASE}/appointments/${id}`, { headers: { 'Authorization': `Bearer ${authToken}` } }).then(r => r.json());
+                const services = appointment.services || [];
+                const packages = appointment.packages || [];
+                const servicesList = (services.length > 0 || packages.length > 0)
+                    ? [...packages.map(p => `${p.name} (Package)`), ...services.map(s => s.name)].join(', ')
+                    : 'No services selected';
+                const currentEstimate = appointment.service_estimate || appointment.suggested_estimate || 0;
+
+                const result = await Swal.fire({
+                    title: 'Automan',
+                    text: `Customer wants: ${servicesList}\n\nService estimate (PHP) — auto-calculated for this vehicle, adjust if needed`,
+                    input: 'text',
+                    inputValue: currentEstimate.toString(),
+                    showCancelButton: true,
+                    confirmButtonText: 'Approve',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (result.value === undefined) return;
+                service_estimate = result.value;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/appointments/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ status, service_estimate: parseFloat(service_estimate) || 0, reason: rejectionReason })
+                });
+
+                if (response.ok) {
+                    Swal.fire({ title: 'Automan', text: `Appointment ${status.toLowerCase()}! SMS notification sent.`, icon: 'success' });
+                    loadAppointments();
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error updating appointment', icon: 'error' });
+            }
+        }
+
+        loadAppointments();
+        loadCustomers();
+
+        // New bookings save instantly, but a page already open has no way
+        // to know that — poll every 8s so a fresh customer appointment
+        // shows up with only a short delay, without staff having to
+        // manually reload. Skipped while any modal is open so it can't
+        // yank the list out from under someone mid-review/mid-edit, and
+        // skipped while a refresh from the previous tick is still in
+        // flight so a slow request can't pile up overlapping calls.
+        let appointmentsRefreshInFlight = false;
+        const appointmentsRefreshInterval = setInterval(async () => {
+            if (document.querySelector('.modal.show')) return;
+            if (appointmentsRefreshInFlight) return;
+            appointmentsRefreshInFlight = true;
+            try {
+                await loadAppointments();
+            } finally {
+                appointmentsRefreshInFlight = false;
+            }
+        }, 8000);
+        window.addEventListener('beforeunload', () => clearInterval(appointmentsRefreshInterval));
+    </script>
+</body>
+</html>

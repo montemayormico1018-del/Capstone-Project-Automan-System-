@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Manrope', 'Segoe UI', sans-serif; background: linear-gradient(180deg, #f7f7f8, #ececef); }
+
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #0f0f10 0%, #1a1a1d 100%);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+            color: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            z-index: 10;
+        }
+
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show { display: block; }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+            .layout-container { flex-direction: column; }
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: 280px !important;
+            }
+            .sidebar.show { transform: translateX(0) !important; }
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding-top: 1rem;
+            }
+        }
+
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            padding: 0.875rem 1.25rem;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 0 8px 8px 0;
+            margin: 4px 8px;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: white;
+            transform: translateX(4px);
+            box-shadow: var(--shadow-brand);
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 1rem;
+            margin: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .user-info .badge {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+    </style>
+
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --primary-soft: #1a1a1d;
+            --secondary-color: #e53935;
+            --secondary-dark: #b71c1c;
+            --accent-color: #c0c0c0;
+            --accent-soft: #f4f4f5;
+            --text-light: #f8f9fa;
+            --text-dark: #1f2328;
+            --border-soft: rgba(229,57,53,0.15);
+            --shadow-brand: 0 14px 40px rgba(0,0,0,0.18);
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important; }
+
+        .sidebar {
+            background: linear-gradient(180deg, rgba(15,15,16,0.98), rgba(32,32,35,0.98)) !important;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.14);
+        }
+
+        .page-header {
+            background:
+                radial-gradient(circle at top right, rgba(229,57,53,0.28), transparent 28%),
+                linear-gradient(135deg, #0f0f10 0%, #1a1a1d 55%, #2a0f12 100%) !important;
+            color: white !important;
+            border-radius: 18px;
+            box-shadow: var(--shadow-brand);
+        }
+
+        .card {
+            border: 1px solid rgba(0,0,0,0.04) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 30px rgba(15,15,16,0.08) !important;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: rgba(229,57,53,0.55) !important;
+            box-shadow: 0 0 0 0.25rem rgba(229,57,53,0.16) !important;
+        }
+
+        .table thead th { background: #121214; color: white; border: none; }
+        .table tbody tr:hover { background: rgba(229,57,53,0.03); }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-responsive > .table { min-width: 900px; margin-bottom: 0; }
+
+        .action-badge { text-transform: capitalize; font-weight: 600; letter-spacing: .02em; }
+        .action-create { background: #10b981 !important; }
+        .action-update { background: #f59e0b !important; }
+        .action-delete { background: #e53935 !important; }
+
+        @media (max-width: 768px) {
+            .table th, .table td { padding: 0.5rem 0.75rem; font-size: 0.75rem; }
+        }
+    </style>
+
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+            <nav id="sidebarNav"></nav>
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h3 class="fw-bold mb-0"><i class="bi bi-journal-check me-2"></i>Audit Log</h3>
+                    <button class="btn btn-outline-light btn-sm" onclick="loadAuditLog()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+                <p class="mb-0 mt-2 opacity-75" style="font-size:.9rem;">Who created, updated, or deleted inventory and sales records, and when.</p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body py-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Record type</label>
+                            <select class="form-select form-select-sm" id="filterEntityType" onchange="loadAuditLog()">
+                                <option value="">All</option>
+                                <option value="inventory_item">Inventory item</option>
+                                <option value="sale">Sale</option>
+                                <option value="job_order">Job order</option>
+                                <option value="appointment">Appointment</option>
+                                <option value="vehicle">Vehicle</option>
+                                <option value="user">User account</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Action</label>
+                            <select class="form-select form-select-sm" id="filterAction" onchange="loadAuditLog()">
+                                <option value="">All</option>
+                                <option value="create">Create</option>
+                                <option value="update">Update</option>
+                                <option value="delete">Delete</option>
+                                <option value="login">Login</option>
+                                <option value="login_failed">Login failed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <small class="text-muted" id="auditCount"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3 border-0 shadow-sm">
+                    <h5 class="mb-0 fw-semibold text-secondary"><i class="bi bi-list-check me-2"></i>Recent activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4">When</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Record</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTable">
+                                <tr><td colspan="5" class="text-center text-muted py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+
+        if (!authToken) window.location.href = '/login';
+
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (user.role !== 'admin') window.location.href = user.role === 'customer' ? '/customer' : '/dashboard';
+
+        buildSidebar();
+
+        const ENTITY_LABELS = {
+            inventory_item: 'Inventory item', sale: 'Sale', job_order: 'Job order',
+            appointment: 'Appointment', vehicle: 'Vehicle', user: 'User account',
+        };
+        const ACTION_CLASS = {
+            create: 'action-create', update: 'action-update', delete: 'action-delete',
+            login: 'action-create', login_failed: 'action-delete',
+        };
+
+        function formatWhen(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return escapeHtml(String(iso));
+            return d.toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
+        }
+
+        async function loadAuditLog() {
+            const tbody = document.getElementById('auditTable');
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Loading...</td></tr>';
+            try {
+                const params = new URLSearchParams();
+                const entityType = document.getElementById('filterEntityType').value;
+                const action = document.getElementById('filterAction').value;
+                if (entityType) params.set('entity_type', entityType);
+                if (action) params.set('action', action);
+
+                const response = await fetch(`${API_BASE}/audit-logs?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || `Failed to load audit log (${response.status})`);
+                }
+                const data = await response.json();
+                const logs = data.logs || [];
+                document.getElementById('auditCount').textContent = `${data.count || logs.length} entries`;
+
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No matching activity</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = logs.map(entry => `
+                    <tr>
+                        <td class="px-4" style="white-space:nowrap;">${formatWhen(entry.created_at)}</td>
+                        <td>${escapeHtml(entry.username || 'Unknown')}<br><small class="text-muted">${escapeHtml(entry.role || '')}</small></td>
+                        <td><span class="badge action-badge ${ACTION_CLASS[entry.action] || 'bg-secondary'}">${escapeHtml(entry.action || '—')}</span></td>
+                        <td>${escapeHtml(ENTITY_LABELS[entry.entity_type] || entry.entity_type || '—')}</td>
+                        <td>${escapeHtml(entry.description || '—')}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">${escapeHtml(error.message)}</td></tr>`;
+            }
+        }
+
+        loadAuditLog();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --secondary-color: #e53935;
+            --secondary-light: #ff6b6b;
+            --success-color: #10b981;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-light: #f8fafc;
+            --border-radius: 16px;
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+            --shadow-brand: 0 10px 25px rgba(229,57,53,0.25);
+        }
+        
+* { box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #0f0f10 0%, #1a1a1d 100%);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            color: white;
+            z-index: 10;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+        
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .sidebar a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            padding: 0.875rem 1.25rem;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 0 8px 8px 0;
+            margin: 4px 8px;
+            font-weight: 500;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: white;
+            transform: translateX(4px);
+            box-shadow: var(--shadow-brand);
+        }
+        
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .user-info .badge {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #0f0f10 0%, #1a1a1d 50%, #2c1012 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .page-header h3 { font-weight: 700; margin-bottom: 0; color: #ffffff; }
+        .page-header p { opacity: 0.85; margin-bottom: 0; margin-top: 0.5rem; font-size: 0.9rem; color: #ffffff; }
+        
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .card-body { padding: 1.5rem; }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            display: block !important;
+        }
+
+        .table-responsive > .table {
+            min-width: 980px;
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        
+        .table tbody tr:hover {
+            background: linear-gradient(135deg, rgba(229,57,53,0.03), rgba(229,57,53,0.08));
+            transform: translateX(4px);
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #475569;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ef4444, #b71c1c);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            margin: 0 0.75rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: white;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            padding: 0.625rem 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.15);
+        }
+        
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem 1.5rem;
+        }
+        
+.modal-header .btn-close { filter: invert(1); }
+        .modal-body { padding: 1.5rem; }
+        
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+            
+            .layout-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: 280px !important;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0) !important;
+            }
+            
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding-top: 1rem;
+            }
+            
+            .page-header { padding: 1.25rem 1rem; border-radius: 12px; }
+            .page-header h3 { font-size: 1.3rem; }
+            .card { margin-bottom: 1rem; border-radius: 12px; }
+            .table th, .table td { padding: 0.5rem 0.75rem; font-size: 0.75rem; }
+            .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.7rem; }
+            
+            .table th:last-child,
+            .table td:last-child {
+                min-width: 100px !important;
+                width: 100px !important;
+                vertical-align: middle !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .table th, .table td { padding: 0.375rem 0.5rem; font-size: 0.7rem; }
+        }
+
+        /* Uniform action-button widths regardless of label length (icon+text
+           "Add Vehicle" was visually wider than plain "View" despite both
+           using btn-sm). */
+        .customer-actions { flex-wrap: wrap; }
+        .customer-actions .btn { flex: 1 1 0; min-width: 90px; white-space: nowrap; }
+    </style>
+    
+    <script>
+        window.onload = function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        };
+        
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.scrollTo(0, 0);
+            }
+        };
+    </script>
+
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+            
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+            
+            <nav id="sidebarNav"></nav>
+            
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3><i class="bi bi-people me-2"></i>Customers</h3>
+                        <p class="page-subtitle">Manage customer database</p>
+                    </div>
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#customerModal">
+                        <i class="bi bi-plus-circle me-2"></i>Add Customer
+                    </button>
+                </div>
+            </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Address</th>
+                                        <th>Vehicles</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTable">
+                                    <tr><td colspan="7" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+    <!-- Customer Modal -->
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="customerForm" onsubmit="return false;">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="customerEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="customerPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="customerAddress" rows="2"></textarea>
+                        </div>
+                    </form>
+                    <p class="text-muted small mb-0">After saving, you'll be prompted to add their first vehicle.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createCustomer()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vehicle Modal (reused for: right after creating a customer, and for adding
+         a vehicle to an existing customer via the "Add Vehicle" row action) -->
+    <div class="modal fade" id="vehicleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vehicleModalTitle">Add Vehicle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="vehicleCustomerId">
+                    <p class="small text-muted mb-2" id="vehicleModalCustomerLabel"></p>
+                    <form id="vehicleForm" onsubmit="return false;">
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Make</label>
+                            <select class="form-select" id="vehicleMake" onchange="onVehicleMakeChange()" required>
+                                <option value="">Select Make</option>
+                            </select>
+                        </div>
+                        <div class="mb-2" id="vehicleMakeOtherWrap" style="display: none;">
+                            <input type="text" class="form-control" id="vehicleMakeOther" placeholder="Enter make (e.g. Foton)">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Model</label>
+                            <select class="form-select" id="vehicleModel" disabled required>
+                                <option value="">Select Model</option>
+                            </select>
+                        </div>
+                        <div class="mb-2" id="vehicleModelOtherWrap" style="display: none;">
+                            <input type="text" class="form-control" id="vehicleModelOther" placeholder="Enter model (e.g. Tamaraw)">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label small mb-1">Year</label>
+                                <input type="number" class="form-control" id="vehicleYear" placeholder="Year" min="1980" max="2100" step="1" inputmode="numeric">
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label small mb-1">Vehicle Type</label>
+                                <select class="form-select" id="vehicleType">
+                                    <option value="Gasoline" selected>Gasoline</option>
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="HEV">HEV (Hybrid)</option>
+                                    <option value="PHEV">PHEV (Plug-in Hybrid)</option>
+                                    <option value="BEV">BEV (Fully Electric)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Size Class</label>
+                            <select class="form-select" id="vehicleSizeClass">
+                                <option value="small">Small (Sedan/Hatchback)</option>
+                                <option value="midsize" selected>Midsize (Crossover/SUV/MPV)</option>
+                                <option value="large">Large (Pickup/Full-size SUV/Van)</option>
+                            </select>
+                            <small class="text-muted">Auto-suggested from the model — drives package/service pricing tiers.</small>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-1 d-block">Identifier Type</label>
+                            <div class="btn-group w-100" role="group" aria-label="Plate or conduction sticker">
+                                <button type="button" class="btn btn-outline-secondary btn-sm active" id="vehiclePlateTypeBtnPlate" onclick="setVehiclePlateType('plate_number')">Plate Number</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="vehiclePlateTypeBtnConduction" onclick="setVehiclePlateType('conduction_sticker')">Conduction Sticker</button>
+                            </div>
+                            <input type="hidden" id="vehicleIdentifierType" value="plate_number">
+                        </div>
+                        <div class="mb-2">
+                            <input type="text" class="form-control" id="vehiclePlate" placeholder="NBC 1234" maxlength="8"
+                                   pattern="[A-Za-z0-9\- ]*"
+                                   oninput="onVehiclePlateInput()" onblur="validateVehiclePlateField()">
+                            <small class="text-muted d-block mt-1" id="vehiclePlateHint">Optional — can be added later, at booking time.</small>
+                            <small class="text-danger d-block mt-1" id="vehiclePlateError" style="display:none;"></small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="vehicleModalSkipBtn">Skip</button>
+                    <button type="button" class="btn btn-primary" onclick="submitVehicleModal()">Save Vehicle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+
+        if (!authToken) window.location.href = '/login';
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (!['admin', 'staff'].includes(user.role)) window.location.href = user.role === 'customer' ? '/customer' : '/dashboard';
+
+        // Common Philippine market vehicle makes/models for the Add Vehicle dropdown.
+        const vehicleData = {
+            "Toyota": ["Vios", "Fortuner", "Innova", "Hilux", "Camry", "Corolla Altis", "RAV4", "Hiace", "Wigo", "Yaris"],
+            "Honda": ["City", "Civic", "CR-V", "HR-V", "Jazz", "BR-V"],
+            "Mitsubishi": ["Montero Sport", "Xpander", "Lancer EX", "Mirage", "Triton"],
+            "Ford": ["Everest", "EcoSport", "Ranger"],
+            "Nissan": ["Terra", "Navara", "Almera", "Kicks"],
+            "Hyundai": ["Santa Fe", "Tucson", "Creta", "Starex", "Accent"],
+            "Kia": ["Sorento", "Sportage", "Carnival", "Seltos", "Picanto"],
+            "Mazda": ["CX-5", "CX-9", "CX-3"],
+            "Suzuki": ["Vitara", "Swift", "Ertiga", "Jimny"],
+            "Chevrolet": ["Trailblazer", "Colorado", "Trax", "Spark"],
+            "Isuzu": ["MU-X", "D-Max"],
+            "Tesla": ["Model 3", "Model Y", "Model S", "Model X"]
+        };
+        const OTHER_MAKE_VALUE = '__other__';
+
+        // Mirrors utils/vehicle_size_class.py — used to auto-suggest a size
+        // class when a model is picked (still editable by staff afterward).
+        const MODEL_SIZE_CLASS = {
+            'toyota|vios': 'small', 'toyota|wigo': 'small', 'toyota|yaris': 'small', 'toyota|corolla altis': 'small',
+            'toyota|camry': 'midsize', 'toyota|rav4': 'midsize', 'toyota|innova': 'midsize',
+            'toyota|fortuner': 'large', 'toyota|hilux': 'large', 'toyota|hiace': 'large',
+            'honda|city': 'small', 'honda|civic': 'small', 'honda|jazz': 'small',
+            'honda|cr-v': 'midsize', 'honda|hr-v': 'midsize', 'honda|br-v': 'midsize',
+            'mitsubishi|mirage': 'small', 'mitsubishi|lancer ex': 'small', 'mitsubishi|xpander': 'midsize',
+            'mitsubishi|montero sport': 'large', 'mitsubishi|triton': 'large',
+            'ford|ecosport': 'midsize', 'ford|everest': 'large', 'ford|ranger': 'large',
+            'nissan|almera': 'small', 'nissan|kicks': 'midsize', 'nissan|terra': 'large', 'nissan|navara': 'large',
+            'hyundai|accent': 'small', 'hyundai|creta': 'midsize', 'hyundai|tucson': 'midsize',
+            'hyundai|santa fe': 'large', 'hyundai|starex': 'large',
+            'kia|picanto': 'small', 'kia|seltos': 'midsize', 'kia|sportage': 'midsize',
+            'kia|sorento': 'large', 'kia|carnival': 'large',
+            'mazda|cx-3': 'midsize', 'mazda|cx-5': 'midsize', 'mazda|cx-9': 'large',
+            'suzuki|swift': 'small', 'suzuki|jimny': 'small', 'suzuki|vitara': 'midsize', 'suzuki|ertiga': 'midsize',
+            'chevrolet|spark': 'small', 'chevrolet|trax': 'midsize',
+            'chevrolet|trailblazer': 'large', 'chevrolet|colorado': 'large',
+            'isuzu|mu-x': 'large', 'isuzu|d-max': 'large',
+            'tesla|model 3': 'midsize', 'tesla|model y': 'midsize', 'tesla|model s': 'large', 'tesla|model x': 'large'
+        };
+
+        function guessSizeClass(make, model) {
+            const key = `${(make || '').trim().toLowerCase()}|${(model || '').trim().toLowerCase()}`;
+            return MODEL_SIZE_CLASS[key] || 'midsize';
+        }
+
+        async function loadVehicleMakes() {
+            const makeSelect = document.getElementById('vehicleMake');
+
+            Object.keys(vehicleData).sort().forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                makeSelect.appendChild(option);
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/brands`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                if (response.ok) {
+                    const data = await response.json();
+                    (data.brands || []).forEach(brand => {
+                        if (!vehicleData[brand.name] && !Array.from(makeSelect.options).some(opt => opt.value === brand.name)) {
+                            vehicleData[brand.name] = [];
+                            const option = document.createElement('option');
+                            option.value = brand.name;
+                            option.textContent = brand.name;
+                            makeSelect.appendChild(option);
+                        }
+                    });
+                }
+            } catch (error) {
+                // Fall back to the built-in defaults below if brands can't be fetched.
+            }
+
+            const otherOption = document.createElement('option');
+            otherOption.value = OTHER_MAKE_VALUE;
+            otherOption.textContent = 'Other (not listed)';
+            makeSelect.appendChild(otherOption);
+        }
+
+        function onVehicleMakeChange() {
+            const make = document.getElementById('vehicleMake').value;
+            const modelSelect = document.getElementById('vehicleModel');
+            const makeOtherWrap = document.getElementById('vehicleMakeOtherWrap');
+            const modelOtherWrap = document.getElementById('vehicleModelOtherWrap');
+
+            if (make === OTHER_MAKE_VALUE) {
+                makeOtherWrap.style.display = 'block';
+                modelSelect.style.display = 'none';
+                modelOtherWrap.style.display = 'block';
+                modelSelect.disabled = true;
+                modelSelect.required = false;
+                return;
+            }
+
+            makeOtherWrap.style.display = 'none';
+            modelSelect.style.display = '';
+            modelOtherWrap.style.display = 'none';
+
+            const models = vehicleData[make] || [];
+            modelSelect.innerHTML = '<option value="">Select Model</option>' +
+                models.map(m => `<option value="${m}">${m}</option>`).join('') +
+                `<option value="${OTHER_MAKE_VALUE}">Other (not listed)</option>`;
+            modelSelect.disabled = !make;
+            modelSelect.required = true;
+
+            modelSelect.onchange = () => {
+                if (modelSelect.value === OTHER_MAKE_VALUE) {
+                    modelSelect.style.display = 'none';
+                    modelOtherWrap.style.display = 'block';
+                    modelSelect.required = false;
+                } else {
+                    document.getElementById('vehicleSizeClass').value = guessSizeClass(make, modelSelect.value);
+                }
+            };
+        }
+
+        function getVehicleMakeModel() {
+            const makeSelect = document.getElementById('vehicleMake');
+            const make = makeSelect.value === OTHER_MAKE_VALUE
+                ? document.getElementById('vehicleMakeOther').value.trim()
+                : makeSelect.value;
+
+            const modelSelect = document.getElementById('vehicleModel');
+            const model = (modelSelect.value === OTHER_MAKE_VALUE || modelSelect.style.display === 'none')
+                ? document.getElementById('vehicleModelOther').value.trim()
+                : modelSelect.value;
+
+            return { make, model };
+        }
+
+        buildSidebar();
+
+        function formatVehicleBadge(vehicle) {
+            const plate = (vehicle.license_plate || '').trim();
+            if (plate) return plate;
+
+            const parts = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean);
+            if (parts.length > 0) return parts.join(' ');
+
+            return vehicle.vehicle_type || 'Vehicle';
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/customers`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const customers = await response.json();
+                window.customersCache = customers;
+
+                document.getElementById('customersTable').innerHTML = customers.map((c, i) => `
+                    <tr>
+                        <td>#${i + 1}</td>
+                        <td>${escapeHtml(c.name)}</td>
+                        <td>${c.email ? escapeHtml(c.email) : '-'}</td>
+                        <td>${escapeHtml(c.phone)}</td>
+                        <td>${c.address ? escapeHtml(c.address) : '-'}</td>
+                        <td>${c.vehicles && c.vehicles.length > 0 ? c.vehicles.map(v => `<span class="badge bg-secondary me-1 mb-1">${escapeHtml(formatVehicleBadge(v))}</span>`).join('') : '-'}</td>
+                        <td>
+                            <div class="d-flex gap-2 customer-actions">
+                                <button class="btn btn-sm btn-primary" onclick="viewCustomerDetails('${c.id}')">View</button>
+                                <button class="btn btn-sm btn-outline-success" onclick="addVehicleForCustomer('${c.id}')">
+                                    <i class="bi bi-plus-circle"></i> Add Vehicle
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('') || '<tr><td colspan="7" class="text-center text-muted">No customers</td></tr>';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function viewCustomerDetails(customerId) {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/customers`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const customers = await response.json();
+                const customer = customers.find(c => c.id === customerId);
+
+                if (!customer) {
+                    Swal.fire({ title: 'Automan', text: 'Customer not found.', icon: 'warning' });
+                    return;
+                }
+
+                const vehResponse = await fetch(`${API_BASE}/appointments/vehicles?customer_id=${customerId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const vehData = await vehResponse.json();
+                const vehicles = vehData.vehicles || [];
+
+                const vehiclesHtml = vehicles.length > 0
+                    ? `<ul class="text-start ps-3 mb-0">${vehicles.map(v => `
+                        <li class="mb-1">${escapeHtml(formatVehicleBadge(v))} - ${escapeHtml(v.vehicle_type || '')}${v.color ? ` - ${escapeHtml(v.color)}` : ''}</li>
+                    `).join('')}</ul>`
+                    : '<p class="text-muted mb-0">No vehicles on file.</p>';
+
+                Swal.fire({
+                    title: escapeHtml(customer.name),
+                    html: `
+                        <div class="text-start">
+                            <p class="mb-1"><strong>Email:</strong> ${escapeHtml(customer.email || '-')}</p>
+                            <p class="mb-1"><strong>Phone:</strong> ${escapeHtml(customer.phone || '-')}</p>
+                            <p class="mb-3"><strong>Address:</strong> ${escapeHtml(customer.address || '-')}</p>
+                            <p class="mb-1"><strong>Vehicles:</strong></p>
+                            ${vehiclesHtml}
+                        </div>
+                    `,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bi bi-plus-circle"></i> Add Vehicle',
+                    cancelButtonText: 'Close'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        openVehicleModal(customer.id, customer.name);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading customer details:', error);
+                Swal.fire({ title: 'Automan', text: 'Failed to load customer details.', icon: 'error' });
+            }
+        }
+
+        async function viewVehicles(customerId) {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/vehicles?customer_id=${customerId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                const vehicles = data.vehicles || [];
+                window.vehiclesCache = vehicles;
+
+                if (vehicles.length === 0) {
+                    Swal.fire({ title: 'Automan', text: 'No vehicles found for this customer.', icon: 'info' });
+                    return;
+                }
+
+                const listHtml = vehicles.map(v => `
+                    <li class="mb-1 d-flex justify-content-between align-items-center">
+                        <span>${escapeHtml(formatVehicleBadge(v))}${v.color ? ` - ${escapeHtml(v.color)}` : ''}</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="editVehicleFromList('${customerId}', '${v.id}')"><i class="bi bi-pencil"></i> Edit</button>
+                    </li>
+                `).join('');
+
+                Swal.fire({
+                    title: 'Customer Vehicles',
+                    html: `<ul class="text-start ps-3 mb-0">${listHtml}</ul>`,
+                    icon: 'info'
+                });
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+                Swal.fire({ title: 'Automan', text: 'Failed to load vehicles.', icon: 'error' });
+            }
+        }
+
+        function editVehicleFromList(customerId, vehicleId) {
+            const v = (window.vehiclesCache || []).find(x => x.id === vehicleId);
+            if (!v) return;
+            Swal.close();
+            openVehicleModal(customerId, null, v);
+        }
+
+        async function createCustomer() {
+            const customerData = {
+                name: document.getElementById('customerName').value,
+                email: document.getElementById('customerEmail').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddress').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/appointments/customers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify(customerData)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    Swal.fire({ title: 'Automan', text: err.error || 'Failed to create customer', icon: 'error' });
+                    return;
+                }
+
+                const customer = await response.json();
+                bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+                loadCustomers();
+
+                // Immediately prompt to add their first vehicle, reusing the
+                // same vehicle modal used for adding one to an existing customer.
+                openVehicleModal(customer.customer.id, customer.customer.name);
+            } catch (error) {
+                Swal.fire({
+                    title: 'Automan',
+                    text: 'Error creating customer',
+                    icon: 'error'
+                });
+            }
+        }
+
+        // Client-side mirror of utils/plate_utils.py — convenience only, the
+        // backend re-validates everything regardless of what passes here.
+        const PLATE_TYPE_RULES = {
+            plate_number: {
+                regexes: [/^[A-Z]{3}[0-9]{4}$/, /^[A-Z]{3}[0-9]{3}$/, /^[A-Z0-9]{5,7}$/],
+                errorMsg: 'Invalid plate number format. Expected one of: 3 letters followed by 4 digits (e.g., NBC 1234); 3 letters followed by 3 digits (e.g., ABC 123); 5 to 7 letters/digits (e.g., AB1234).',
+                placeholder: 'NBC 1234'
+            },
+            conduction_sticker: {
+                regexes: [/^[A-Z]{2}[0-9]{4}$/],
+                errorMsg: 'Invalid conduction sticker format. Expected 2 letters followed by 4 digits (e.g., NC 1234).',
+                placeholder: 'NC 1234'
+            }
+        };
+
+        function normalizePlateClient(value) {
+            return (value || '').replace(/[\s\-]/g, '').toUpperCase();
+        }
+
+        function setVehiclePlateType(type) {
+            document.getElementById('vehicleIdentifierType').value = type;
+            document.getElementById('vehiclePlateTypeBtnPlate').classList.toggle('active', type === 'plate_number');
+            document.getElementById('vehiclePlateTypeBtnConduction').classList.toggle('active', type === 'conduction_sticker');
+            document.getElementById('vehiclePlate').placeholder = PLATE_TYPE_RULES[type].placeholder;
+            validateVehiclePlateField();
+        }
+
+        function onVehiclePlateInput() {
+            const input = document.getElementById('vehiclePlate');
+            const cursor = input.selectionStart;
+            input.value = input.value.toUpperCase();
+            if (cursor !== null) input.setSelectionRange(cursor, cursor);
+        }
+
+        function validateVehiclePlateField() {
+            const type = document.getElementById('vehicleIdentifierType').value;
+            const normalized = normalizePlateClient(document.getElementById('vehiclePlate').value);
+            const errorEl = document.getElementById('vehiclePlateError');
+
+            if (!normalized) {
+                errorEl.style.display = 'none';
+                return true; // optional field on this form — blank is allowed
+            }
+            const rules = PLATE_TYPE_RULES[type];
+            const ok = rules.regexes.some(re => re.test(normalized));
+            errorEl.style.display = ok ? 'none' : 'block';
+            if (!ok) errorEl.textContent = rules.errorMsg;
+            return ok;
+        }
+
+        function addVehicleForCustomer(customerId) {
+            const cust = (window.customersCache || []).find(x => x.id === customerId);
+            openVehicleModal(customerId, cust ? cust.name : null);
+        }
+
+        function openVehicleModal(customerId, customerName, vehicleToEdit) {
+            document.getElementById('vehicleCustomerId').value = customerId;
+            document.getElementById('vehicleModalCustomerLabel').textContent = customerName ? `For: ${customerName}` : '';
+            document.getElementById('vehicleModalTitle').textContent = vehicleToEdit ? 'Edit Vehicle' : 'Add Vehicle';
+            document.getElementById('vehicleModalSkipBtn').textContent = vehicleToEdit ? 'Cancel' : 'Skip';
+            window.editingVehicleId = vehicleToEdit ? vehicleToEdit.id : null;
+
+            const makeSelect = document.getElementById('vehicleMake');
+            const knownMake = vehicleToEdit && Array.from(makeSelect.options).some(opt => opt.value === vehicleToEdit.make);
+
+            if (vehicleToEdit && !knownMake) {
+                makeSelect.value = OTHER_MAKE_VALUE;
+                document.getElementById('vehicleMakeOther').value = vehicleToEdit.make || '';
+                document.getElementById('vehicleMakeOtherWrap').style.display = 'block';
+                document.getElementById('vehicleModel').style.display = 'none';
+                document.getElementById('vehicleModel').disabled = true;
+                document.getElementById('vehicleModelOtherWrap').style.display = 'block';
+                document.getElementById('vehicleModelOther').value = vehicleToEdit.model || '';
+            } else if (vehicleToEdit) {
+                makeSelect.value = vehicleToEdit.make;
+                document.getElementById('vehicleMakeOtherWrap').style.display = 'none';
+                onVehicleMakeChange();
+                const modelSelect = document.getElementById('vehicleModel');
+                const knownModel = Array.from(modelSelect.options).some(opt => opt.value === vehicleToEdit.model);
+                if (knownModel) {
+                    modelSelect.value = vehicleToEdit.model;
+                    document.getElementById('vehicleModelOtherWrap').style.display = 'none';
+                } else {
+                    modelSelect.value = OTHER_MAKE_VALUE;
+                    modelSelect.style.display = 'none';
+                    document.getElementById('vehicleModelOtherWrap').style.display = 'block';
+                    document.getElementById('vehicleModelOther').value = vehicleToEdit.model || '';
+                }
+            } else {
+                makeSelect.value = '';
+                document.getElementById('vehicleMakeOther').value = '';
+                document.getElementById('vehicleMakeOtherWrap').style.display = 'none';
+                document.getElementById('vehicleModel').innerHTML = '<option value="">Select Model</option>';
+                document.getElementById('vehicleModel').disabled = true;
+                document.getElementById('vehicleModel').style.display = '';
+                document.getElementById('vehicleModelOther').value = '';
+                document.getElementById('vehicleModelOtherWrap').style.display = 'none';
+            }
+
+            document.getElementById('vehicleYear').value = vehicleToEdit ? (vehicleToEdit.year || '') : '';
+            document.getElementById('vehicleType').value = vehicleToEdit ? (vehicleToEdit.vehicle_type || 'Gasoline') : 'Gasoline';
+            document.getElementById('vehicleSizeClass').value = vehicleToEdit ? (vehicleToEdit.size_class || 'midsize') : 'midsize';
+            document.getElementById('vehiclePlate').value = vehicleToEdit ? (vehicleToEdit.plate_or_sticker_no || vehicleToEdit.license_plate || '') : '';
+            document.getElementById('vehiclePlateError').style.display = 'none';
+            setVehiclePlateType(vehicleToEdit ? (vehicleToEdit.identifier_type || 'plate_number') : 'plate_number');
+
+            new bootstrap.Modal(document.getElementById('vehicleModal')).show();
+        }
+
+        async function submitVehicleModal() {
+            const customerId = document.getElementById('vehicleCustomerId').value;
+            const { make, model } = getVehicleMakeModel();
+
+            if (!customerId || !make || !model) {
+                Swal.fire({ title: 'Automan', text: 'Make and model are required', icon: 'warning' });
+                return;
+            }
+
+            if (!validateVehiclePlateField()) {
+                Swal.fire({ title: 'Automan', text: document.getElementById('vehiclePlateError').textContent, icon: 'warning' });
+                return;
+            }
+
+            const yearInput = document.getElementById('vehicleYear').value.trim();
+            const currentYearMax = new Date().getFullYear() + 1;
+            let year = null;
+            if (yearInput) {
+                if (!/^\d{4}$/.test(yearInput) || +yearInput < 1980 || +yearInput > currentYearMax) {
+                    Swal.fire({ title: 'Automan', text: `Enter a single valid 4-digit year between 1980 and ${currentYearMax}`, icon: 'warning' });
+                    return;
+                }
+                year = parseInt(yearInput, 10);
+            }
+
+            const vehiclePayload = {
+                customer_id: customerId,
+                make,
+                model,
+                year,
+                type: document.getElementById('vehicleType').value,
+                size_class: document.getElementById('vehicleSizeClass').value,
+                identifier_type: document.getElementById('vehicleIdentifierType').value,
+                plate_or_sticker_no: normalizePlateClient(document.getElementById('vehiclePlate').value)
+            };
+
+            await saveVehiclePayload(vehiclePayload);
+        }
+
+        async function saveVehiclePayload(vehiclePayload) {
+            const editingId = window.editingVehicleId;
+            const url = editingId ? `${API_BASE}/appointments/vehicles/${editingId}` : `${API_BASE}/appointments/vehicles`;
+            const method = editingId ? 'PUT' : 'POST';
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify(vehiclePayload)
+                });
+
+                if (response.status === 409) {
+                    const warn = await response.json().catch(() => ({}));
+                    const result = await Swal.fire({
+                        title: 'Plate already registered elsewhere',
+                        text: warn.warning || 'This plate/sticker is already registered under a different customer.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Register anyway',
+                        cancelButtonText: 'Cancel'
+                    });
+                    if (result.isConfirmed) {
+                        await saveVehiclePayload({ ...vehiclePayload, confirm_duplicate: true });
+                    }
+                    return;
+                }
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    Swal.fire({ title: 'Automan', text: err.error || 'Failed to save vehicle', icon: 'error' });
+                    return;
+                }
+
+                Swal.fire({ title: 'Automan', text: editingId ? 'Vehicle updated successfully!' : 'Vehicle added successfully!', icon: 'success' });
+                bootstrap.Modal.getInstance(document.getElementById('vehicleModal')).hide();
+                window.editingVehicleId = null;
+                loadCustomers();
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error saving vehicle', icon: 'error' });
+            }
+        }
+
+        loadCustomers();
+        loadVehicleMakes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+
+{
+  "hosting": {
+    "site": "automan-car-care",
+    "public": "firebase-public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

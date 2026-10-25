@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Automan Car Care</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --accent-color: #e53935;
+            --secondary-color: #1a1a1d;
+            --text-light: #ecf0f1;
+            --brand-dark: #0a0a0c;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: inherit;
+        }
+        
+    body {
+    font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #000000 !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+        .register-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1050px;
+            min-height: 600px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        
+        .register-branding {
+            flex: 1;
+            background: #000000;
+            color: white;
+            padding: 50px 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-branding::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 70%, rgba(229, 57, 53, 0.12) 0%, transparent 50%);
+        }
+        
+        .register-branding::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(229, 57, 53, 0.4), transparent);
+        }
+        
+        .branding-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: #fff;
+        }
+        
+        .branding-title {
+            font-size: 2.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .register-branding h1.branding-title,
+        .branding-content h1.branding-title {
+            color: #ffffff !important;
+        }
+        
+        .branding-subtitle {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            margin-bottom: 35px;
+            color: #fff !important;
+        }
+        
+        .branding-features {
+            text-align: left;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .branding-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            opacity: 0.95;
+            color: #fff !important;
+        }
+        
+        .branding-feature i {
+            font-size: 1.3rem;
+            color: var(--accent-color);
+        }
+        
+        .register-form-section {
+            flex: 1;
+            padding: 50px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            background: #fafafa;
+            max-height: 90vh;
+            overflow-y: auto;
+            min-height: 500px;
+        }
+        
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f0f10;
+            margin-bottom: 4px;
+        }
+        
+        .form-subtitle {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 28px;
+        }
+        
+        .form-label {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        .form-control {
+            padding: 14px 15px 14px 45px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.15);
+            outline: none;
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        /* firstName/middleInitial/lastName have no .input-icon, so they
+           don't need the 45px left padding reserved for icon fields above --
+           without this override that padding crushes the narrow M.I. column. */
+        #firstName, #middleInitial, #lastName {
+            padding-left: 15px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1.1rem;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .form-control:focus ~ .input-icon {
+            color: var(--accent-color);
+        }
+        
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
+        
+        .form-control.is-invalid + .input-icon + .invalid-feedback,
+        .form-control.is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, var(--accent-color), #c62828);
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            width: 100%;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(229, 57, 53, 0.35);
+            margin-top: 10px;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(229, 57, 53, 0.45);
+            color: white;
+        }
+        
+        .btn-register:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .password-rules {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 18px;
+            font-size: 0.85rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .password-rules h6 {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+        
+        .password-rules ul {
+            margin: 0;
+            padding-left: 18px;
+            color: #666;
+        }
+        
+        .password-rules li {
+            margin-bottom: 4px;
+        }
+        
+        .password-rules li.valid {
+            color: #28a745;
+        }
+        
+        .password-rules li.invalid {
+            color: #dc3545;
+        }
+        
+        .login-link {
+            color: var(--accent-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .login-link:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 18px;
+            padding: 12px 15px;
+        }
+        
+        .text-center {
+            margin-top: 18px;
+            color: #666;
+        }
+        
+        .verification-section {
+            display: none;
+        }
+        
+        .verification-section.active {
+            display: block;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 2px;
+        }
+        
+        .navbar-mini {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand-mini {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .navbar-brand-mini img {
+            width: 70px;
+        }
+        
+        @media (max-width: 900px) {
+            .register-wrapper {
+                flex-direction: column;
+                max-width: 480px;
+                min-height: auto;
+            }
+            
+            .register-branding {
+                padding: 30px 25px;
+            }
+            
+            .branding-title {
+                font-size: 1.7rem;
+                color: #fff !important;
+            }
+            
+            .branding-subtitle {
+                font-size: 1rem;
+            }
+            
+            .branding-features {
+                display: none;
+            }
+            
+            .register-form-section {
+                padding: 30px 25px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .register-wrapper {
+                margin: 0;
+                max-width: 100%;
+                border-radius: 16px;
+            }
+            
+            .register-branding {
+                padding: 25px 20px;
+            }
+            
+            .branding-title {
+                font-size: 1.5rem;
+                color: #fff !important;
+            }
+            
+            .register-form-section {
+                padding: 25px 20px;
+            }
+            
+            .form-title {
+                font-size: 1.3rem;
+            }
+            
+            .form-control {
+                padding: 12px 15px 12px 40px;
+                font-size: 0.95rem;
+            }
+            
+            .input-icon {
+                left: 12px;
+                font-size: 1rem;
+            }
+            
+            .btn-register {
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            .form-check {
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Prevent horizontal scroll */
+        @media (max-width: 576px) {
+            html, body {
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
+        }
+    </style>
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-branding">
+            <div class="navbar-mini">
+                <a href="/" class="navbar-brand-mini">
+                    <img src="{{ url_for('static', filename='images/automan-logo.png') }}" alt="Logo">
+                </a>
+            </div>
+            <div class="branding-content">
+                <h1 class="branding-title">Join Us Today</h1>
+                <p class="branding-subtitle">Create your account to get started</p>
+                
+                <div class="branding-features">
+                    <div class="branding-feature">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Quick Service</span>
+                    </div>
+                    <div class="branding-feature">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Easy Scheduling</span>
+                    </div>
+                    <div class="branding-feature">
+                        <i class="bi bi-person-check"></i>
+                        <span>Expert Technicians</span>
+                    </div>
+                    <div class="branding-feature">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Quality Guaranteed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="register-form-section">
+            <h2 class="form-title">Create Account</h2>
+            <p class="form-subtitle">Register as a customer</p>
+            
+            <div id="alertContainer"></div>
+            
+            <form id="registerForm">
+                <div class="row g-2 mb-3">
+                    <div class="col-5">
+                        <input type="text" class="form-control" id="firstName" placeholder="First Name" maxlength="50" pattern="[A-Za-zÀ-ÖØ-öø-ÿ' \-]+" required>
+                        <div class="invalid-feedback">Required, letters only (max 50 characters)</div>
+                    </div>
+                    <div class="col-2">
+                        <input type="text" class="form-control" id="middleInitial" placeholder="M.I." maxlength="2" pattern="[A-Za-zÀ-ÖØ-öø-ÿ]\.?">
+                        <div class="invalid-feedback">Single letter only (e.g. "C")</div>
+                    </div>
+                    <div class="col-5">
+                        <input type="text" class="form-control" id="lastName" placeholder="Last Name" maxlength="50" pattern="[A-Za-zÀ-ÖØ-öø-ÿ' \-]+" required>
+                        <div class="invalid-feedback">Required, letters only (max 50 characters)</div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="username" placeholder="Username" maxlength="30" pattern="[A-Za-z0-9_.]+" required>
+                    <i class="bi bi-person input-icon"></i>
+                    <div class="invalid-feedback">Username is required, letters/numbers/underscore/period only (max 30 characters)</div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="email" class="form-control" id="email" placeholder="Email" required>
+                    <i class="bi bi-envelope input-icon"></i>
+                    <div class="invalid-feedback">Valid email is required</div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" class="form-control" id="address" placeholder="Address" maxlength="200" required>
+                    <i class="bi bi-geo-alt input-icon"></i>
+                    <div class="invalid-feedback">Address is required</div>
+                </div>
+
+                <div class="input-group">
+                    <input type="tel" class="form-control" id="contactNumber" placeholder="Phone Number" maxlength="13" pattern="(09|\+63)[0-9]+" required>
+                    <i class="bi bi-phone input-icon"></i>
+                    <div class="invalid-feedback">Valid Philippine phone number is required</div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" class="form-control" id="password" placeholder="Password" required>
+                    <i class="bi bi-lock input-icon"></i>
+                    <div class="invalid-feedback">Password does not meet requirements</div>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" required>
+                    <i class="bi bi-lock input-icon"></i>
+                    <div class="invalid-feedback">Passwords do not match</div>
+                </div>
+                
+                <div class="password-rules">
+                    <h6><i class="bi bi-shield-lock me-1"></i> Password Requirements:</h6>
+                    <ul>
+                        <li id="rule-length">More than 6 characters</li>
+                        <li id="rule-uppercase">At least 1 uppercase letter</li>
+                        <li id="rule-special">At least 1 special character (!@#$%^&*)</li>
+                    </ul>
+                </div>
+                
+                <button type="submit" class="btn btn-register" id="registerBtn">
+                    <i class="bi bi-person-plus me-2"></i> Register
+                </button>
+            </form>
+            
+            <form id="verifyForm" class="verification-section">
+                <div class="text-center mb-4">
+                    <i class="bi bi-envelope-check register-verify-icon"></i>
+                    <h4 class="mt-3">Verify Your Email</h4>
+                    <p class="text-muted">We've sent a verification code to <span id="verificationEmail" class="fw-bold"></span></p>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" class="form-control text-center register-verification-code" id="verificationCode" placeholder="Enter 6-digit code" maxlength="6" required>
+                    <i class="bi bi-key input-icon"></i>
+                    <div class="invalid-feedback">Please enter the verification code</div>
+                </div>
+                
+                <button type="submit" class="btn btn-register" id="verifyBtn">
+                    <i class="bi bi-check-circle me-2"></i> Verify Email
+                </button>
+                
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-link" id="resendCode">Resend Code</button>
+                </div>
+            </form>
+            
+            <div class="text-center">
+                Already have an account? <a href="/login" class="login-link">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = '/api';
+        let registeredEmail = '';
+        
+        if (sessionStorage.getItem('token')) {
+            window.location.href = '/dashboard';
+        }
+        
+        // Middle initial is at most one letter + an optional trailing dot --
+        // maxlength/pattern only validate on submit, they don't stop a
+        // second letter from being typed, so filter live on every keystroke.
+        function restrictMiddleInitialInput(el) {
+            const letterMatch = el.value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/);
+            const letter = letterMatch ? letterMatch[0] : '';
+            const hasDot = el.value.includes('.');
+            el.value = letter + (letter && hasDot ? '.' : '');
+        }
+        document.getElementById('middleInitial').addEventListener('input', function() {
+            restrictMiddleInitialInput(this);
+        });
+
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            document.getElementById('rule-length').classList.toggle('valid', password.length > 6);
+            document.getElementById('rule-length').classList.toggle('invalid', password.length <= 6);
+            document.getElementById('rule-uppercase').classList.toggle('valid', /[A-Z]/.test(password));
+            document.getElementById('rule-uppercase').classList.toggle('invalid', !/[A-Z]/.test(password));
+            document.getElementById('rule-special').classList.toggle('valid', /[!@#$%^&*(),.?":{}|<>]/.test(password));
+            document.getElementById('rule-special').classList.toggle('invalid', !/[!@#$%^&*(),.?":{}|<>]/.test(password));
+        });
+        
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const middleInitial = document.getElementById('middleInitial').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const contactNumber = document.getElementById('contactNumber').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            document.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+            
+            if (password.length <= 6) {
+                passwordInput.classList.add('is-invalid');
+                showAlert('Password must be more than 6 characters', 'danger');
+                return;
+            }
+            
+            if (!/[A-Z]/.test(password)) {
+                passwordInput.classList.add('is-invalid');
+                showAlert('Password must contain at least 1 uppercase letter', 'danger');
+                return;
+            }
+            
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                passwordInput.classList.add('is-invalid');
+                showAlert('Password must contain at least 1 special character', 'danger');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                confirmPasswordInput.classList.add('is-invalid');
+                showAlert('Passwords do not match', 'danger');
+                return;
+            }
+            
+            if (!/^(09|\+63)\d{9}$/.test(contactNumber)) {
+                document.getElementById('contactNumber').classList.add('is-invalid');
+                showAlert('Invalid phone number format. Use 09XXXXXXXXX', 'danger');
+                return;
+            }
+
+            const namePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ' \-]+$/;
+            if (!firstName || firstName.length > 50 || !namePattern.test(firstName)) {
+                document.getElementById('firstName').classList.add('is-invalid');
+                showAlert('First name is required, letters only (max 50 characters)', 'danger');
+                return;
+            }
+            if (!lastName || lastName.length > 50 || !namePattern.test(lastName)) {
+                document.getElementById('lastName').classList.add('is-invalid');
+                showAlert('Last name is required, letters only (max 50 characters)', 'danger');
+                return;
+            }
+            const middleInitialPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ]\.?$/;
+            if (middleInitial && !middleInitialPattern.test(middleInitial)) {
+                document.getElementById('middleInitial').classList.add('is-invalid');
+                showAlert('Middle initial must be a single letter (e.g. "C" or "C.")', 'danger');
+                return;
+            }
+
+            if (username.length > 30 || !/^[A-Za-z0-9_.]+$/.test(username)) {
+                document.getElementById('username').classList.add('is-invalid');
+                showAlert('Username must be 30 characters or fewer and contain only letters, numbers, underscore, or period', 'danger');
+                return;
+            }
+
+            if (address.length > 200) {
+                document.getElementById('address').classList.add('is-invalid');
+                showAlert('Address must be 200 characters or fewer', 'danger');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Registering...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        first_name: firstName,
+                        middle_initial: middleInitial,
+                        last_name: lastName,
+                        email,
+                        address,
+                        contact_number: contactNumber,
+                        password,
+                        confirm_password: confirmPassword,
+                        role: 'customer'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showAlert(data.error || 'Registration failed', 'danger');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-person-plus me-2"></i> Register';
+                    return;
+                }
+                
+                registeredEmail = email;
+                document.getElementById('verificationEmail').textContent = email;
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('verifyForm').classList.add('active');
+                
+                let message = 'Registration successful! OTP sent to your email.';
+                if (!data.email_sent) {
+                    message += ' (check console for OTP in dev mode)';
+                }
+                showAlert(message, 'success');
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-person-plus me-2"></i> Register';
+                
+            } catch (error) {
+                showAlert('An error occurred', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-person-plus me-2"></i> Register';
+            }
+        });
+        
+        document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('verificationCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                showAlert('Please enter a valid 6-digit code', 'danger');
+                return;
+            }
+            
+            const btn = document.getElementById('verifyBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Verifying...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: registeredEmail, 
+                        verification_code: code
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showAlert(data.error || 'Verification failed', 'danger');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i> Verify Email';
+                    return;
+                }
+                
+                showAlert('Email verified successfully! Redirecting to login...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
+                
+            } catch (error) {
+                showAlert('An error occurred', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-circle me-2"></i> Verify Email';
+            }
+        });
+        
+        document.getElementById('resendCode').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/resend-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: registeredEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.email_sent) {
+                    showAlert('New OTP sent to your email!', 'success');
+                } else {
+                    showAlert(data.error || 'Failed to resend code', 'danger');
+                }
+            } catch (error) {
+                showAlert('An error occurred', 'danger');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Resend Code';
+        });
+        
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function showAlert(message, type) {
+            document.getElementById('alertContainer').innerHTML =
+                `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${escapeHtml(message)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>`;
+        }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+        }
+    </script>
+</body>
+</html>

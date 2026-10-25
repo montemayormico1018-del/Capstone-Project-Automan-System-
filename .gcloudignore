@@ -1,0 +1,13 @@
+# Files that must never be uploaded to Cloud Run
+firebase-credentials.json
+.env
+
+# Local-only stuff
+.venv/
+__pycache__/
+*.pyc
+.claude/
+instance/
+*.db
+*.sqlite3
+AutoMan_Chatbot_Knowledge.docx

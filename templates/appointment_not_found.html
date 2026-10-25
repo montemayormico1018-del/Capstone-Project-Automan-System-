@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Not Found - Automan Car Care</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --warning-color: #f59e0b;
+            --warning-light: #fbbf24;
+            --primary: #0f0f10;
+            --text-secondary: #4a4a68;
+            --title-color: #92400e;
+            --border-radius: 16px;
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        body {
+            font-family: 'Manrope', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .warning-card {
+            max-width: 500px;
+            width: 100%;
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .warning-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+        }
+        
+        .warning-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+        
+        h2 {
+            font-weight: 700;
+            color: var(--title-color);
+            margin-bottom: 1rem;
+        }
+        
+        p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #d97706;
+            color: #d97706;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #d97706;
+            color: white;
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center">
+    <div class="card warning-card animate-fade-in">
+        <div class="warning-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h2>Appointment Not Found</h2>
+        <p>This appointment may have been deleted or doesn't exist.</p>
+        <p class="mb-0">Please check the link or contact our staff for assistance.</p>
+        <a href="/" class="btn btn-outline-primary mt-4">
+            <i class="bi bi-house me-2"></i>Back to Home
+        </a>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

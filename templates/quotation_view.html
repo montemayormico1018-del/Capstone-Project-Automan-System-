@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Automan Car Care - Quotation Details">
+    <title>Quotation {{ appointment.appointment_number or appointment.id }} - Automan Car Care</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #0f0f10;
+            --primary: #1a1a1d;
+            --accent: #e53935;
+            --accent-light: #ff6b6b;
+            --accent-gradient: linear-gradient(135deg, #e53935 0%, #ff6b6b 100%);
+            --success: #10b981;
+            --success-light: #34d399;
+            --info: #3b82f6;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+            --border-radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            max-width: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: #0f0f10;
+            color: white;
+            padding: 1rem 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: #e53935;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-logo i {
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+            color: white;
+        }
+
+        .brand-text small {
+            font-size: 0.7rem;
+            opacity: 0.85;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        /* Main Card */
+        .quotation-card {
+            max-width: 720px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background: white;
+            overflow: hidden;
+        }
+
+        .card-header-main {
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .header-title i {
+            color: var(--accent);
+            font-size: 1.4rem;
+        }
+
+        .header-title h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .quotation-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .quotation-id {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .quotation-id strong {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-left: 0.35rem;
+        }
+
+        /* Status Badge */
+        .status-badge-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-quotation-sent .status-dot {
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Card Body */
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-header i {
+            color: var(--accent);
+            font-size: 1.05rem;
+        }
+
+        .section-header h5 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Vehicle Card */
+        .vehicle-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: visible;
+        }
+
+        .vehicle-identity {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .vehicle-name {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .vehicle-brand-icon {
+            width: 48px;
+            height: 48px;
+            background: #e53935;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .vehicle-brand-icon i {
+            font-size: 1.75rem;
+            color: white;
+        }
+
+        .vehicle-plate-badge {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .plate-icon {
+            width: 32px;
+            height: 32px;
+            background: #3b82f6;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .plate-icon i {
+            font-size: 1rem;
+            color: white;
+        }
+
+        .plate-number {
+            font-family: 'Manrope', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+        }
+
+        /* Services */
+        .services-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .services-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .service-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .service-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .service-item:hover {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, #fff5f5, #ffffff);
+            transform: translateX(6px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.2);
+        }
+
+        .service-icon i {
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .service-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .service-check {
+            color: var(--success);
+            font-size: 1.25rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .service-item:hover .service-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Appointment Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .info-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .info-icon-wrapper.date {
+            background: #dbeafe;
+            color: #3b82f6;
+        }
+
+        .info-icon-wrapper.time {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .info-icon-wrapper i {
+            font-size: 1.1rem;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        /* Estimate Section */
+        .estimate-section {
+            background: #e53935;\n            border-radius: 8px;
+            padding: 1.5rem;\n            text-align: center;
+            color: white;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.2);
+        }
+
+        .estimate-section::before {
+            content: '';
+            position: absolute;
+            top: -70%;
+            right: -25%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
+            pointer-events: none;
+            animation: float-rotate 20s linear infinite;
+        }
+
+        @keyframes float-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .estimate-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .estimate-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .estimate-currency {
+            font-size: 1.1rem;
+            font-weight: 600;
+            vertical-align: top;
+            margin-right: 0.25rem;
+        }
+
+        .estimate-note {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 0.5rem;
+        }
+
+        /* Action Buttons */
+        .actions-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-approve {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #059669;
+        }
+
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #dc2626;
+        }
+
+        .btn-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Footer */
+        .card-footer-custom {
+            background: #f8fafc;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .footer-badges {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .footer-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .footer-badge i {
+            color: var(--accent);
+        }
+
+        .footer-contact {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-contact a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-contact a:hover {
+            text-decoration: underline;
+        }
+
+        /* Back Navigation */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 1.75rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 10px;
+            transition: var(--transition);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-decoration: none;
+        }
+
+        /* Modal */
+        .modal-content {
+            border: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--hover-shadow);
+        }
+
+        .modal-header {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 1.5rem 2rem;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+            opacity: 0.9;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .modal-title {
+            font-weight: 700;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--border-color);
+            gap: 0.75rem;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+            min-height: 48px;
+            font-weight: 600;
+        }
+
+        /* ==================== */
+        /* RESPONSIVE STYLES     */
+        /* ==================== */
+
+        /* Large Mobile / Small Tablet */
+        @media (max-width: 992px) {
+            .container {
+                max-width: 100%;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .page-header {
+                padding: 2.25rem 1.5rem;
+            }
+            
+            .brand-logo {
+                width: 52px;
+                height: 52px;
+            }
+        }
+
+        /* Tablet Portrait & Large Phones */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 1.5rem;
+            }
+
+            .page-header {
+                padding: 2rem 1rem;
+                margin-left: 0;
+                margin-right: 0;
+                border-radius: 0 0 14px 14px;
+            }
+
+            .brand-logo {
+                width: 48px;
+                height: 48px;
+            }
+
+            .brand-logo i {
+                font-size: 1.5rem;
+            }
+
+            .brand-text h1 {
+                font-size: 1.2rem;
+            }
+
+            .brand-text small {
+                font-size: 0.75rem;
+            }
+
+            .card-body {
+                padding: 1.25rem;
+            }
+
+            .card-header-main {
+                padding: 1.25rem 1.25rem;
+            }
+
+            .header-title h2 {
+                font-size: 1.2rem;
+            }
+
+            .quotation-id {
+                font-size: 0.8rem;
+            }
+
+            /* Vehicle Card */
+            .vehicle-card {
+                padding: 1.25rem;
+                position: relative;
+            }
+
+            .vehicle-identity {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: flex-start;
+            }
+
+            .vehicle-name {
+                font-size: 1.2rem;
+                line-height: 1.3;
+                padding-right: 0;
+                width: 100%;
+            }
+
+            .vehicle-brand-icon {
+                position: absolute;
+                top: 1.25rem;
+                right: 1.25rem;
+                width: 44px;
+                height: 44px;
+            }
+
+            .vehicle-brand-icon i {
+                font-size: 1.5rem;
+            }
+
+            .vehicle-plate-badge {
+                padding: 0.625rem 1rem;
+                margin-top: 0.25rem;
+            }
+
+            .plate-number {
+                font-size: 1.1rem;
+            }
+
+            /* Services */
+            .service-item {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+
+            .service-icon {
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+            }
+
+            .service-icon i {
+                font-size: 1.1rem;
+            }
+
+            .service-name {
+                font-size: 0.95rem;
+                line-height: 1.4;
+            }
+
+            .service-check {
+                font-size: 1.1rem;
+            }
+
+            /* Info Grid */
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .info-card {
+                padding: 1rem;
+                min-height: 76px;
+            }
+
+            .info-icon-wrapper {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+            }
+
+            .info-icon-wrapper i {
+                font-size: 1.1rem;
+            }
+
+            .info-label {
+                font-size: 0.7rem;
+            }
+
+            .info-value {
+                font-size: 0.95rem;
+            }
+
+            /* Estimate */
+            .estimate-section {
+                padding: 2rem 1.25rem;
+                border-radius: 14px;
+            }
+
+            .estimate-label {
+                font-size: 0.8rem;
+            }
+
+            .estimate-amount {
+                font-size: 2.5rem;
+            }
+
+            .estimate-currency {
+                font-size: 1.25rem;
+            }
+
+            .estimate-note {
+                font-size: 0.8rem;
+            }
+
+            /* Action Buttons - Stacked */
+            .actions-container {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+                margin-top: 1.5rem;
+            }
+
+            .action-btn {
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+                min-height: 56px;
+                border-radius: 12px;
+            }
+
+            .btn-icon {
+                font-size: 1.15rem;
+            }
+
+            /* Footer */
+            .card-footer-custom {
+                padding: 1.25rem;
+            }
+
+            .footer-badges {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .footer-badge {
+                font-size: 0.8rem;
+            }
+
+            .footer-contact {
+                font-size: 0.85rem;
+            }
+
+            /* Back link */
+            .back-link {
+                font-size: 0.9rem;
+                padding: 0.625rem 1.125rem;
+            }
+
+            /* Modal */
+            .modal-dialog {
+                margin: 1rem;
+                max-width: calc(100% - 2rem);
+            }
+
+            .modal-header {
+                padding: 1.25rem 1.5rem;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .modal-footer {
+                padding: 1rem 1.5rem;
+                flex-direction: column;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            .modal-footer .btn:last-child {
+                margin-bottom: 0;
+            }
+
+            /* Section headers */
+            .section-header {
+                margin-bottom: 0.75rem;
+            }
+
+            .section-header h5 {
+                font-size: 0.8rem;
+            }
+
+            /* Status badge */
+            .status-badge-large {
+                font-size: 0.75rem;
+                padding: 0.375rem 0.875rem;
+            }
+
+            /* Reduce animations for performance */
+            .quotation-card:hover,
+            .vehicle-card:hover,
+            .info-card:hover {
+                transform: none;
+            }
+
+            .service-item:hover {
+                transform: translateX(4px);
+            }
+
+            .page-header::after {
+                display: none;
+            }
+        }
+
+        /* Mobile Phones */
+        @media (max-width: 480px) {
+            html {
+                font-size: 14px;
+            }
+
+            .page-header {
+                padding: 1.75rem 0.75rem;
+                margin-left: 0;
+                margin-right: 0;
+                border-radius: 0 0 12px 12px;
+            }
+
+            .brand-container {
+                gap: 0.625rem;
+            }
+
+            .brand-logo {
+                width: 44px;
+                height: 44px;
+            }
+
+            .brand-logo i {
+                font-size: 1.35rem;
+            }
+
+            .brand-text h1 {
+                font-size: 1.1rem;
+            }
+
+            .brand-text small {
+                font-size: 0.7rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .card-header-main {
+                padding: 1rem 1.125rem;
+            }
+
+            .header-title h2 {
+                font-size: 1.1rem;
+            }
+
+            .quotation-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.625rem;
+                margin-top: 0.625rem;
+                padding-top: 0.625rem;
+            }
+
+            .quotation-id {
+                font-size: 0.75rem;
+            }
+
+            .status-badge-large {
+                align-self: flex-start;
+                font-size: 0.7rem;
+                padding: 0.3rem 0.75rem;
+            }
+
+            /* Vehicle */
+            .vehicle-card {
+                padding: 1rem;
+            }
+
+            .vehicle-name {
+                font-size: 1.1rem;
+                padding-right: 0;
+            }
+
+            .vehicle-brand-icon {
+                width: 40px;
+                height: 40px;
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .vehicle-brand-icon i {
+                font-size: 1.35rem;
+            }
+
+            .vehicle-plate-badge {
+                padding: 0.5rem 0.875rem;
+            }
+
+            .plate-icon {
+                width: 30px;
+                height: 30px;
+            }
+
+            .plate-icon i {
+                font-size: 0.85rem;
+            }
+
+            .plate-number {
+                font-size: 1.05rem;
+            }
+
+            /* Services */
+            .service-item {
+                padding: 0.875rem;
+                gap: 0.625rem;
+            }
+
+            .service-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 8px;
+                flex-shrink: 0;
+            }
+
+            .service-icon i {
+                font-size: 1rem;
+            }
+
+            .service-name {
+                font-size: 0.9rem;
+                line-height: 1.4;
+            }
+
+            .service-check {
+                font-size: 1rem;
+            }
+
+            /* Info Cards */
+            .info-card {
+                padding: 0.875rem;
+                gap: 0.625rem;
+                min-height: 72px;
+            }
+
+            .info-icon-wrapper {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+            }
+
+            .info-icon-wrapper i {
+                font-size: 1rem;
+            }
+
+            .info-label {
+                font-size: 0.65rem;
+            }
+
+            .info-value {
+                font-size: 0.9rem;
+                line-height: 1.35;
+            }
+
+            /* Estimate */
+            .estimate-section {
+                padding: 1.75rem 1rem;
+                border-radius: 12px;
+            }
+
+            .estimate-label {
+                font-size: 0.75rem;
+            }
+
+            .estimate-amount {
+                font-size: 2.25rem;
+            }
+
+            .estimate-currency {
+                font-size: 1.2rem;
+            }
+
+            .estimate-note {
+                font-size: 0.75rem;
+            }
+
+            /* Action Buttons */
+            .actions-container {
+                gap: 0.5rem;
+                margin-top: 1.25rem;
+            }
+
+            .action-btn {
+                padding: 0.875rem 1rem;
+                font-size: 0.95rem;
+                font-weight: 700;
+                min-height: 52px;
+                border-radius: 10px;
+            }
+
+            .btn-icon {
+                font-size: 1.1rem;
+            }
+
+            /* Status message */
+            .text-center.py-4 {
+                padding: 1.25rem 0 !important;
+            }
+
+            .text-center i {
+                font-size: 2.25rem;
+            }
+
+            .text-center h4 {
+                font-size: 1.05rem;
+            }
+
+            /* Footer */
+            .card-footer-custom {
+                padding: 1rem;
+            }
+
+            .footer-badges {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.375rem;
+            }
+
+            .footer-badge {
+                font-size: 0.75rem;
+                padding: 0.35rem 0.625rem;
+            }
+
+            .footer-contact {
+                font-size: 0.8rem;
+            }
+
+            /* Back Link */
+            .back-link {
+                font-size: 0.85rem;
+                padding: 0.5rem 1rem;
+            }
+
+            /* Modal */
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+
+            .modal-header {
+                padding: 1rem 1.25rem;
+            }
+
+            .modal-title {
+                font-size: 1.05rem;
+            }
+
+            .modal-body {
+                padding: 1.25rem;
+                font-size: 0.95rem;
+            }
+
+            .modal-footer {
+                padding: 0.75rem 1rem;
+            }
+
+            .modal-footer .btn {
+                padding: 0.5625rem 0.875rem;
+                font-size: 0.875rem;
+                min-height: 44px;
+            }
+
+            /* Section headers */
+            .section-header {
+                margin-bottom: 0.625rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .section-header i {
+                font-size: 0.95rem;
+            }
+
+            .section-header h5 {
+                font-size: 0.75rem;
+            }
+
+            /* Service item text */
+            .service-name {
+                letter-spacing: 0.25px;
+            }
+
+            .estimate-section::before {
+                width: 150px;
+                height: 150px;
+                top: -65%;
+            }
+        }
+
+        /* Extra Small Phones */
+        @media (max-width: 360px) {
+            .page-header {
+                padding: 1.5rem 0.5rem;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .brand-container {
+                gap: 0.5rem;
+            }
+
+            .brand-logo {
+                width: 38px;
+                height: 38px;
+            }
+
+            .brand-logo i {
+                font-size: 1.15rem;
+            }
+
+            .brand-text h1 {
+                font-size: 1rem;
+            }
+
+            .brand-text small {
+                font-size: 0.65rem;
+            }
+
+            .card-body {
+                padding: 0.875rem;
+            }
+
+            .action-btn {
+                padding: 0.75rem 0.875rem;
+                font-size: 0.9rem;
+                min-height: 48px;
+            }
+
+            .estimate-amount {
+                font-size: 2rem;
+            }
+
+            .estimate-currency {
+                font-size: 1.1rem;
+            }
+
+            .plate-number {
+                font-size: 0.95rem;
+            }
+
+            .vehicle-name {
+                font-size: 1rem;
+            }
+
+            .info-value {
+                font-size: 0.875rem;
+            }
+
+            .footer-badge {
+                font-size: 0.7rem;
+            }
+
+            .back-link {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .status-badge-large {
+                font-size: 0.65rem;
+                padding: 0.25rem 0.625rem;
+            }
+
+            .estimate-section::before {
+                width: 120px;
+                height: 120px;
+                top: -60%;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .page-header,
+            .actions-container,
+            .card-footer-custom,
+            .back-link {
+                display: none !important;
+            }
+
+            .quotation-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+            }
+
+            .estimate-section {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* Very large screens */
+        @media (min-width: 1200px) {
+            .quotation-card {
+                max-width: 680px;
+            }
+        }
+
+        /* Orientation landscape on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .page-header {
+                padding: 1.5rem 1rem;
+            }
+            
+            .estimate-section {
+                padding: 1.75rem 1rem;
+            }
+        }
+
+        /* Safe area insets for notched phones (iPhone X+) */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+            }
+            
+            .page-header {
+                padding-left: max(1.5rem, env(safe-area-inset-left) + 1.5rem);
+                padding-right: max(1.5rem, env(safe-area-inset-right) + 1.5rem);
+            }
+        }
+    </style>
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container animate-fade-in">
+        <!-- Header -->
+        <header class="page-header">
+            <div class="brand-container">
+                <div class="brand-logo">
+                    <i class="bi bi-car-front-fill"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Automan Car Care</h1>
+                    <small>Quotation Details</small>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Quotation Card -->
+        <div class="quotation-card">
+            <div class="card-header-main">
+                <div class="header-title">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <h2>Service Quotation</h2>
+                </div>
+                <div class="quotation-meta">
+                    <div class="quotation-id">
+                        Quotation <strong>{{ appointment.appointment_number or appointment.id }}</strong>
+                    </div>
+                    <span class="status-badge-large status-{{ appointment.status.lower().replace(' ', '-') if appointment.status else 'pending' }}">
+                        <span class="status-dot"></span>
+                        {{ appointment.status if appointment.status else 'Pending' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Vehicle Information -->
+                <div class="section-header">
+                    <i class="bi bi-truck"></i>
+                    <h5>Vehicle Information</h5>
+                </div>
+
+                <div class="vehicle-card">
+                    <div class="vehicle-identity">
+                        <div>
+                            <h3 class="vehicle-name">
+                                {{ vehicle.make }} {{ vehicle.model }}
+                            </h3>
+                            <div class="vehicle-plate-badge">
+                                <div class="plate-icon">
+                                    <i class="bi bi-badge-fill"></i>
+                                </div>
+                                <div class="plate-number">
+                                    {{ vehicle.license_plate if vehicle and vehicle.license_plate else (appointment.plate_number if appointment.plate_number else 'N/A') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vehicle-brand-icon">
+                            <i class="bi bi-car-front-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div class="section-header">
+                    <i class="bi bi-list-check"></i>
+                    <h5>Services Requested</h5>
+                </div>
+
+                <div class="services-section">
+                    <ul class="services-list">
+                        {% for package in packages %}
+                        <li class="service-item" style="flex-direction: column; align-items: stretch;">
+                            <div class="d-flex justify-content-between w-100">
+                                <span class="service-name"><i class="bi bi-box-seam me-2"></i>{{ package.name }}</span>
+                                <strong>PHP {{ '%.2f' % package.price_for((vehicle.size_class if vehicle else None) or 'midsize') }}</strong>
+                            </div>
+                            <ul class="list-unstyled ms-4 mt-1 mb-0 small text-muted">
+                                {% for item in package.applicable_items(vehicle) %}
+                                <li><i class="bi bi-check2 me-1"></i>{{ item.item_name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% endfor %}
+                        {% for service in services %}
+                        <li class="service-item">
+                            <div class="service-icon">
+                                <i class="bi bi-gear-fill"></i>
+                            </div>
+                            <span class="service-name">{{ service.name }}</span>
+                            <i class="bi bi-check-circle-fill service-check"></i>
+                        </li>
+                        {% endfor %}
+                        {% if not packages and not services %}
+                        <li class="service-item text-muted text-center justify-content-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            No services selected
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Appointment Details -->
+                <div class="section-header">
+                    <i class="bi bi-calendar-check"></i>
+                    <h5>Appointment Schedule</h5>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon-wrapper date">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Date</div>
+                            <div class="info-value">{{ appointment.preferred_date if appointment.preferred_date else 'To be scheduled' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon-wrapper time">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+                        <div class="info-content">
+                            <div class="info-label">Time</div>
+                            <div class="info-value">
+                            {% if appointment.preferred_time %}
+                                {{ appointment.preferred_time.strftime('%I:%M %p') }}
+                            {% else %}
+                                To be scheduled
+                            {% endif %}
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estimate -->
+                <div class="section-header">
+                    <i class="bi bi-cash-stack"></i>
+                    <h5>Cost Estimate</h5>
+                </div>
+
+                <div class="estimate-section">
+                    <div class="estimate-label">Total Estimated Cost</div>
+                    <div class="estimate-amount">
+                        <span class="estimate-currency">PHP</span>
+                        {% if appointment.min_estimate and appointment.max_estimate %}
+                            {{ "{:,.0f}".format(appointment.min_estimate) }} - {{ "{:,.0f}".format(appointment.max_estimate) }}
+                        {% else %}
+                            {{ "{:,.2f}".format(appointment.service_estimate) if appointment.service_estimate else "0.00" }}
+                        {% endif %}
+                    </div>
+                    <div class="estimate-note">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Valid for 7 days from issuance
+                    </div>
+                </div>
+
+                <!-- Action Buttons - Only show if Pending or Quotation Sent -->
+                {% if appointment.status in ['Pending', 'Quotation Sent'] %}
+                <div class="actions-container">
+                    <form id="approveForm" method="POST" action="/quotation/approve/{{ appointment.id }}" style="display:contents;">
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <a href="#" class="action-btn btn-approve" onclick="return confirmAction('approve');">
+                            <i class="bi bi-check-circle-fill btn-icon"></i>
+                            <span>Approve Quotation</span>
+                        </a>
+                    </form>
+
+                    <form id="rejectForm" method="POST" action="/quotation/reject/{{ appointment.id }}" style="display:contents;">
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <a href="#" class="action-btn btn-reject" onclick="return confirmAction('reject');">
+                            <i class="bi bi-x-circle-fill btn-icon"></i>
+                            <span>Reject Quotation</span>
+                        </a>
+                    </form>
+                </div>
+                {% if not token_valid %}
+                <p class="text-center text-muted small mt-2">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    This link may have expired. If approval fails, please ask us to resend your quotation SMS.
+                </p>
+                {% endif %}
+                {% endif %}
+
+                <!-- Already Processed Message -->
+                {% if appointment.status not in ['Pending', 'Quotation Sent'] %}
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-info-circle-fill text-info quotation-info-icon"></i>
+                    </div>
+                    <h4 class="text-secondary">This quotation has been {{ appointment.status.lower() }}</h4>
+                    <p class="text-muted mb-0">Current status: 
+                        <strong class="text-uppercase quotation-status-text">{{ appointment.status }}</strong>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Footer -->
+            <div class="card-footer-custom">
+                <div class="footer-badges">
+                    <div class="footer-badge">
+                        <i class="bi bi-shield-fill-check"></i>
+                        <span>7-Day Validity</span>
+                    </div>
+                    <div class="footer-badge">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span>(63) 968-236-7189</span>
+                    </div>
+                    <div class="footer-badge">
+                        <i class="bi bi-envelope-fill"></i>
+                        <span>automansystem@gmail.com</span>
+                    </div>
+                </div>
+                <p class="footer-contact mb-0">
+                    Questions? Contact us at 
+                    <a href="tel:0212345678">(63) 968-236-7189</a> or 
+                    <a href="mailto:service@automan.com">automansystem@gmail.com</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back Navigation -->
+        <div class="text-center">
+            <a href="/" class="back-link">
+                <i class="bi bi-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Confirm Action
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">Are you sure you want to proceed?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a href="#" id="confirmButton" class="btn btn-primary">Confirm</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Confirmation modal for approve/reject — the action itself is a
+        // POST form submission (carries the signed token, and can't be
+        // triggered just by a link-preview bot prefetching a GET URL).
+        let pendingAction = null;
+
+        function confirmAction(action) {
+            event.preventDefault();
+            pendingAction = action;
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            const confirmBtn = document.getElementById('confirmButton');
+            const message = document.getElementById('confirmMessage');
+
+            if (action === 'approve') {
+                message.innerHTML = '<strong>Approve this quotation?</strong><br><br>Your vehicle service will begin as scheduled. You will receive an SMS confirmation.';
+                confirmBtn.className = 'btn btn-success';
+                confirmBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Confirm Approval';
+            } else if (action === 'reject') {
+                message.innerHTML = '<strong>Reject this quotation?</strong><br><br>Our staff will contact you to discuss alternative options.';
+                confirmBtn.className = 'btn btn-danger';
+                confirmBtn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Confirm Rejection';
+            }
+
+            modal.show();
+            return false;
+        }
+
+        document.getElementById('confirmButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (pendingAction === 'approve') {
+                document.getElementById('approveForm').submit();
+            } else if (pendingAction === 'reject') {
+                document.getElementById('rejectForm').submit();
+            }
+        });
+
+        // Touch optimizations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add visual feedback for touch
+            const touchElements = document.querySelectorAll('.action-btn, .back-link, .service-item, .info-card, .vehicle-card');
+            touchElements.forEach(el => {
+                el.addEventListener('touchstart', function() {
+                    this.style.opacity = '0.8';
+                });
+                el.addEventListener('touchend', function() {
+                    this.style.opacity = '1';
+                });
+            });
+            
+            // Prevent double-tap zoom on buttons
+            const buttons = document.querySelectorAll('.action-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    this.click();
+                });
+            });
+        });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+        }
+    </script>
+</body>
+</html>

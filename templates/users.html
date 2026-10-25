@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Manrope', 'Segoe UI', sans-serif; background: linear-gradient(180deg, #f7f7f8, #ececef); }
+
+        /* Base page layout — every other admin page defines this locally
+           (design-system.css only layers cosmetic tokens on top); this page
+           was missing it entirely, so the sidebar and main content stacked
+           vertically as plain blocks instead of sitting side by side. */
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #0f0f10 0%, #1a1a1d 100%);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+            color: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            z-index: 10;
+        }
+
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show { display: block; }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+
+            .layout-container { flex-direction: column; }
+
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: 280px !important;
+            }
+
+            .sidebar.show { transform: translateX(0) !important; }
+
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding-top: 1rem;
+            }
+        }
+        
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .sidebar a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            padding: 0.875rem 1.25rem;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 0 8px 8px 0;
+            margin: 4px 8px;
+            font-weight: 500;
+        }
+        
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: white;
+            transform: translateX(4px);
+            box-shadow: var(--shadow-brand);
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 1rem;
+            margin: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .user-info .badge {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            margin: 0 0.75rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: white;
+        }
+
+    </style>
+
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --primary-soft: #1a1a1d;
+            --secondary-color: #e53935;
+            --secondary-dark: #b71c1c;
+            --accent-color: #c0c0c0;
+            --accent-soft: #f4f4f5;
+            --text-light: #f8f9fa;
+            --text-dark: #1f2328;
+            --border-soft: rgba(229,57,53,0.15);
+            --shadow-brand: 0 14px 40px rgba(0,0,0,0.18);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+
+        .brand-logo,
+        .auth-logo,
+        .sidebar-logo,
+        .hero-logo,
+        .navbar-logo {
+            display: inline-block;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 18px rgba(0,0,0,0.18));
+        }
+
+        .auth-logo { width: 260px; max-width: 85%; margin-bottom: 18px; }
+        .sidebar-logo { width: 140px; max-width: 100%; margin: 0 auto 10px; display:block; }
+        .navbar-logo { width: 140px; }
+        .hero-logo { width: 320px; max-width: 100%; margin-bottom: 24px; }
+
+        .sidebar {
+            background:
+                linear-gradient(180deg, rgba(15,15,16,0.98), rgba(32,32,35,0.98)) !important;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.14);
+        }
+
+        .page-header,
+        .hero {
+            background:
+                radial-gradient(circle at top right, rgba(229,57,53,0.28), transparent 28%),
+                linear-gradient(135deg, #0f0f10 0%, #1a1a1d 55%, #2a0f12 100%) !important;
+            color: white !important;
+            border-radius: 18px;
+            box-shadow: var(--shadow-brand);
+        }
+
+        .card,
+        .stat-card,
+        .modal-content {
+            border: 1px solid rgba(0,0,0,0.04) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 30px rgba(15,15,16,0.08) !important;
+        }
+
+        .btn-primary,
+        .btn-login,
+        .btn-register,
+        .btn-action-primary,
+        .nav-btn-primary {
+            background: linear-gradient(135deg, #e53935, #b71c1c) !important;
+            border: none !important;
+            color: #fff !important;
+            box-shadow: 0 10px 20px rgba(229,57,53,0.2);
+        }
+
+        .btn-primary:hover,
+        .btn-login:hover,
+        .btn-register:hover,
+        .btn-action-primary:hover,
+        .nav-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px rgba(229,57,53,0.28);
+        }
+
+        .btn-outline-light:hover,
+        .nav-btn-outline:hover {
+            color: #111 !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: rgba(229,57,53,0.55) !important;
+            box-shadow: 0 0 0 0.25rem rgba(229,57,53,0.16) !important;
+        }
+
+        .badge.bg-secondary {
+            background: linear-gradient(135deg, #6f6f73, #9a9aa0) !important;
+        }
+
+        .table thead th {
+            background: #121214;
+            color: white;
+            border: none;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(229,57,53,0.03);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-responsive > .table {
+            min-width: 980px;
+            margin-bottom: 0;
+        }
+
+        .login-wrapper,
+        .register-wrapper {
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.28) !important;
+        }
+
+        .login-branding,
+        .register-branding {
+            background:
+                radial-gradient(circle at top left, rgba(229,57,53,0.30), transparent 30%),
+                linear-gradient(135deg, #0f0f10 0%, #1a1a1d 55%, #2c1012 100%) !important;
+        }
+
+        .navbar-custom,
+        .navbar {
+            background:
+                linear-gradient(90deg, rgba(15,15,16,0.97), rgba(30,30,34,0.97)) !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+        }
+
+        .nav-btn-outline {
+            border-color: rgba(255,255,255,0.65) !important;
+        }
+
+        .text-brand-red { color: #e53935 !important; }
+        .text-brand-silver { color: #c0c0c0 !important; }
+
+        @media (max-width: 768px) {
+            /* Table mobile improvements */
+            .table th, .table td {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.75rem;
+            }
+            
+            .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            
+            .table th:last-child,
+            .table td:last-child {
+                min-width: 140px !important;
+                width: 140px !important;
+                vertical-align: middle !important;
+            }
+            
+            .table td > .d-flex {
+                flex-wrap: wrap;
+                gap: 0.25rem;
+                justify-content: flex-start;
+                align-items: center;
+            }
+            
+            .form-select.form-select-sm {
+                font-size: 0.7rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .table th, .table td {
+                padding: 0.375rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            
+            .table th:last-child,
+            .table td:last-child {
+                min-width: 120px !important;
+                width: 120px !important;
+            }
+        }
+
+        .sidebar-nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar-nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: transparent;
+            transition: background 0.25s ease;
+        }
+        
+        .sidebar-nav-item:hover::before,
+        .sidebar-nav-item.active::before {
+            background: #e53935;
+        }
+
+        .user-table-row {
+            transition: all 0.2s ease;
+        }
+        
+        .user-table-row:hover {
+            background-color: rgba(229, 57, 53, 0.04);
+            transform: translateX(4px);
+        }
+
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+
+            <nav id="sidebarNav"></nav>
+
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0"><i class="bi bi-person-gear me-2"></i> User Management</h3>
+                    <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#userModal">
+                        <i class="bi bi-plus-circle me-2"></i>Add User
+                    </button>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-white py-3 border-0 shadow-sm">
+                    <h5 class="mb-0 fw-semibold text-secondary"><i class="bi bi-people me-2"></i>System Users</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4">Full Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Contact Number</th>
+                                    <th>Role</th>
+                                    <th>Availability</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr><td colspan="8" class="text-center text-muted py-4">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header users-modal-header">
+                    <h5 class="modal-title text-white"><i class="bi bi-person-plus me-2"></i>Add New User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm" onsubmit="return false;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Username</label>
+                            <input type="text" class="form-control" value="Generated automatically after you choose a role" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Name</label>
+                            <div class="row g-2">
+                                <div class="col-5">
+                                    <input type="text" class="form-control" id="userFirstName" placeholder="First name" maxlength="50" pattern="[A-Za-zÀ-ÖØ-öø-ÿ' \-]+" title="Letters only (max 50 characters)" required>
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" class="form-control" id="userMiddleInitial" placeholder="M.I." maxlength="2" pattern="[A-Za-zÀ-ÖØ-öø-ÿ]\.?" title="Single letter only (e.g. &quot;C&quot;)">
+                                </div>
+                                <div class="col-5">
+                                    <input type="text" class="form-control" id="userLastName" placeholder="Last name" maxlength="50" pattern="[A-Za-zÀ-ÖØ-öø-ÿ' \-]+" title="Letters only (max 50 characters)" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" id="userEmail" placeholder="Enter email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <input type="password" class="form-control" id="userPassword" placeholder="Enter password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Role</label>
+                            <select class="form-select" id="userRoleSelect" required>
+                                <option value="admin">Admin</option>
+                                <option value="staff">Staff</option>
+                                <option value="mechanic">Mechanic</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Contact Number</label>
+                            <input type="text" class="form-control" id="userContact" placeholder="09XXXXXXXXX" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createUser()">
+                        <i class="bi bi-check-circle me-1"></i>Save User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header users-modal-header">
+                    <h5 class="modal-title text-white"><i class="bi bi-pencil-square me-2"></i>Edit User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control" id="editUserUsername" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Name</label>
+                        <div class="row g-2">
+                            <div class="col-5">
+                                <input type="text" class="form-control" id="editUserFirstName" placeholder="First name" maxlength="50" pattern="[A-Za-zÀ-ÖØ-öø-ÿ' \-]+" title="Letters only (max 50 characters)" required>
+                            </div>
+                            <div class="col-2">
+                                <input type="text" class="form-control" id="editUserMiddleInitial" placeholder="M.I." maxlength="2" pattern="[A-Za-zÀ-ÖØ-öø-ÿ]\.?" title="Single letter only (e.g. &quot;C&quot;)">
+                            </div>
+                            <div class="col-5">
+                                <input type="text" class="form-control" id="editUserLastName" placeholder="Last name" maxlength="50" pattern="[A-Za-zÀ-ÖØ-öø-ÿ' \-]+" title="Letters only (max 50 characters)" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" class="form-control" id="editUserEmail" required>
+                        <small class="text-muted">Changes the login email for this account.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Contact Number</label>
+                        <input type="text" class="form-control" id="editUserContact" placeholder="09XXXXXXXXX" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Role</label>
+                        <input type="text" class="form-control" id="editUserRole" disabled>
+                        <small class="text-muted">Roles can't be changed — deactivate and create a new account instead.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUserEdit()">
+                        <i class="bi bi-check-circle me-1"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+
+        if (!authToken) window.location.href = '/login';
+
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        const userRole = user.role;
+
+        if (userRole !== 'admin') window.location.href = '/dashboard';
+
+        buildSidebar();
+
+        // Middle initial is at most one letter + an optional trailing dot --
+        // maxlength/pattern only validate on submit, they don't stop a
+        // second letter from being typed, so filter live on every keystroke.
+        function restrictMiddleInitialInput(el) {
+            const letterMatch = el.value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/);
+            const letter = letterMatch ? letterMatch[0] : '';
+            const hasDot = el.value.includes('.');
+            el.value = letter + (letter && hasDot ? '.' : '');
+        }
+        document.getElementById('userMiddleInitial').addEventListener('input', function() {
+            restrictMiddleInitialInput(this);
+        });
+        document.getElementById('editUserMiddleInitial').addEventListener('input', function() {
+            restrictMiddleInitialInput(this);
+        });
+
+        let usersCache = [];
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/users`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                if (!response.ok) throw new Error('Failed to fetch users');
+                const users = await response.json();
+                usersCache = users;
+
+                const roleColors = {
+                    admin: 'danger',
+                    staff: 'primary',
+                    mechanic: 'info',
+                    customer: 'secondary'
+                };
+
+                document.getElementById('usersTable').innerHTML = users.map((u, i) => `
+                    <tr class="user-table-row">
+                        <td class="px-4 fw-semibold">${u.full_name ? escapeHtml(u.full_name) : '—'}</td>
+                        <td class="fw-medium">${escapeHtml(u.username)}</td>
+                        <td><a href="mailto:${encodeURIComponent(u.email || '')}" class="text-decoration-none">${escapeHtml(u.email)}</a></td>
+                        <td>${u.contact_number ? escapeHtml(u.contact_number) : '—'}</td>
+                        <td><span class="badge bg-${roleColors[u.role] || 'secondary'}">${u.role}</span></td>
+                        <td>${u.role === 'mechanic' ? `<select class="form-select form-select-sm" onchange="setAvailability('${u.id}', this.value)"><option value="available" ${u.availability === 'available' ? 'selected' : ''}>Available</option><option value="not_available" ${u.availability !== 'available' ? 'selected' : ''}>Not Available</option></select>` : '—'}</td>
+                        <td><span class="badge bg-${u.is_active ? 'success' : 'warning'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+                        <td>
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <button class="btn btn-sm btn-outline-primary action-btn" onclick="openEditUser('${u.id}')">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-${u.is_active ? 'outline-warning' : 'outline-success'} action-btn" onclick="toggleUser('${u.id}', ${u.is_active ? 'false' : 'true'})">
+                                    <i class="bi bi-${u.is_active ? 'eye-slash' : 'check-circle'}"></i> ${u.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('') || '<tr><td colspan="8" class="text-center text-muted py-4">No users found</td></tr>';
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersTable').innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Error loading users: ' + error.message + '</td></tr>';
+            }
+        }
+
+        async function createUser() {
+            const data = {
+                first_name: document.getElementById('userFirstName').value.trim(),
+                middle_initial: document.getElementById('userMiddleInitial').value.trim(),
+                last_name: document.getElementById('userLastName').value.trim(),
+                email: document.getElementById('userEmail').value,
+                password: document.getElementById('userPassword').value,
+                role: document.getElementById('userRoleSelect').value,
+                contact_number: document.getElementById('userContact').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        title: 'Automan',
+                        text: 'User created successfully!',
+                        icon: 'success'
+                    });
+                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                    document.getElementById('userForm').reset();
+                    loadUsers();
+                } else {
+                    Swal.fire({
+                        title: 'Automan',
+                        text: result.error || 'Failed to create user',
+                        icon: 'error'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Automan',
+                    text: 'Error creating user: ' + error.message,
+                    icon: 'error'
+                });
+            }
+        }
+
+        // Existing accounts created before the first/middle/last split only
+        // have a single full_name on record — naive best-effort split so
+        // the edit form isn't shown blank for them. Purely a pre-fill
+        // convenience; never trusted as authoritative (the admin can
+        // correct it, and saving always writes back the structured fields).
+        function splitFullNameForPrefill(fullName) {
+            const words = (fullName || '').trim().split(/\s+/).filter(Boolean);
+            if (words.length === 0) return { first: '', middle: '', last: '' };
+            if (words.length === 1) return { first: words[0], middle: '', last: '' };
+            const last = words[words.length - 1];
+            const first = words[0];
+            const middleWords = words.slice(1, -1);
+            // Field only accepts a single-letter initial, so a legacy full_name
+            // with a spelled-out middle name (e.g. "Juan Carlos Dela Cruz")
+            // pre-fills just its first letter, not the whole word.
+            const middle = middleWords.length ? middleWords[0].charAt(0) : '';
+            return { first, middle, last };
+        }
+
+        function openEditUser(id) {
+            const u = usersCache.find(x => x.id === id);
+            if (!u) return;
+            document.getElementById('editUserId').value = u.id;
+            document.getElementById('editUserUsername').value = u.username;
+            const hasStructuredName = u.first_name || u.last_name;
+            const nameParts = hasStructuredName
+                ? { first: u.first_name || '', middle: u.middle_initial || '', last: u.last_name || '' }
+                : splitFullNameForPrefill(u.full_name);
+            document.getElementById('editUserFirstName').value = nameParts.first;
+            document.getElementById('editUserMiddleInitial').value = nameParts.middle;
+            document.getElementById('editUserLastName').value = nameParts.last;
+            document.getElementById('editUserEmail').value = u.email || '';
+            document.getElementById('editUserContact').value = u.contact_number || '';
+            document.getElementById('editUserRole').value = u.role;
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        async function saveUserEdit() {
+            const id = document.getElementById('editUserId').value;
+            const data = {
+                first_name: document.getElementById('editUserFirstName').value.trim(),
+                middle_initial: document.getElementById('editUserMiddleInitial').value.trim(),
+                last_name: document.getElementById('editUserLastName').value.trim(),
+                email: document.getElementById('editUserEmail').value.trim(),
+                contact_number: document.getElementById('editUserContact').value.trim()
+            };
+            if (!data.first_name || !data.last_name || !data.email || !data.contact_number) {
+                Swal.fire({ title: 'Automan', text: 'First name, last name, email, and contact number are required', icon: 'warning' });
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    Swal.fire({ title: 'Automan', text: 'User updated!', icon: 'success' });
+                    bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                    loadUsers();
+                } else {
+                    Swal.fire({ title: 'Automan', text: result.error || 'Failed to update user', icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error updating user: ' + error.message, icon: 'error' });
+            }
+        }
+
+        async function toggleUser(id, activate) {
+            const result = await Swal.fire({
+                title: 'Automan',
+                text: activate ? 'Activate this user?' : 'Deactivate this user?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel'
+            });
+            
+            if (!result.isConfirmed) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ is_active: activate })
+                });
+
+                if (response.ok) {
+                    loadUsers();
+                } else {
+                    const result = await response.json();
+                    Swal.fire({
+                        title: 'Automan',
+                        text: result.error || 'Failed to update user',
+                        icon: 'error'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Automan',
+                    text: 'Error updating user: ' + error.message,
+                    icon: 'error'
+                });
+            }
+        }
+
+        async function setAvailability(id, availability) {
+            try {
+                const response = await fetch(`${API_BASE}/users/mechanics/${id}/availability`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ availability })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Failed to update availability');
+                loadUsers();
+            } catch (error) { Swal.fire({ title: 'Automan', text: error.message, icon: 'error' }); loadUsers(); }
+        }
+
+        async function changeRole(id, newRole, currentRole) {
+            if (newRole === currentRole) return;
+            
+            const result = await Swal.fire({
+                title: 'Automan',
+                text: `Change role from "${currentRole}" to "${newRole}"?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, change',
+                cancelButtonText: 'Cancel'
+            });
+            
+            if (!result.isConfirmed) {
+                loadUsers();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ role: newRole })
+                });
+
+                if (response.ok) {
+                    loadUsers();
+                } else {
+                    const result = await response.json();
+                    Swal.fire({
+                        title: 'Automan',
+                        text: result.error || 'Failed to change role',
+                        icon: 'error'
+                    });
+                    loadUsers();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Automan',
+                    text: 'Error changing role: ' + error.message,
+                    icon: 'error'
+                });
+                loadUsers();
+            }
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>

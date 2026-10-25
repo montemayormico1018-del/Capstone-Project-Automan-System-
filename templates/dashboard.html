@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --secondary-color: #e53935;
+            --success-color: #10b981;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --sidebar-width: 280px;
+        }
+
+        * { box-sizing: border-box; }
+
+        /* ── RESET: prevent anything from blowing out the viewport ── */
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* ── LAYOUT ── */
+        .layout-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            flex-shrink: 0;
+            background: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            min-height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* FIX: was "#sidebar" (targets the nav element) — must be ".sidebar a" */
+        .sidebar a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 12px;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), #ff6b6b);
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(229,57,53,0.4);
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 0 12px 20px;
+        }
+
+        .user-info .badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: capitalize;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main-content {
+            flex: 1 1 0%;
+            min-width: 0;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), #2d2d30);
+            color: white;
+            padding: 24px 28px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .page-header h2 { font-weight: 600; margin-bottom: 0; color: #ffffff; }
+        .page-header p  { opacity: 0.85; margin-bottom: 0; margin-top: 5px; font-size: 0.9rem; color: #ffffff; }
+        .page-header i  { color: #ffffff; }
+
+        /* ── CARDS ── */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            background: white;
+            /* overflow:visible so inner table-responsive scrollbar isn't clipped */
+            overflow: visible;
+            width: 100%;
+        }
+
+        .card-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .card-body { padding: 0; }
+
+        /* ── STAT CARDS ── */
+        .stat-card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            background: white;
+            overflow: visible;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .stat-card .card-body { padding: 1.25rem; }
+
+        .stat-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.warning { background: rgba(245,158,11,0.15);  color: var(--warning-color); }
+        .stat-icon.success { background: rgba(16,185,129,0.15);  color: var(--success-color); }
+        .stat-icon.info    { background: rgba(59,130,246,0.15);  color: var(--info-color); }
+        .stat-icon.primary { background: rgba(229,57,53,0.15);   color: var(--secondary-color); }
+
+        .stat-value  { font-size: 1.75rem; font-weight: 700; color: #1e293b; line-height: 1; }
+        .stat-label  { font-size: 0.8rem;  color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .stat-subtitle { font-size: 0.75rem; color: #94a3b8; }
+
+        /* ── TABLE ── */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            /* border-radius matches card bottom corners */
+            border-radius: 0 0 1rem 1rem;
+        }
+
+        .table { margin-bottom: 0; }
+
+        .table thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            font-weight: 600;
+            padding: 0.875rem 1.25rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table tbody td {
+            padding: 0.875rem 1.25rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        /* ── STATUS BADGES ── */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            display: inline-block;
+        }
+
+        .status-pending      { background: #fef3c7; color: #92400e; }
+        .status-approved     { background: #d1fae5; color: #065f46; }
+        .status-rejected     { background: #fee2e2; color: #991b1b; }
+        .status-cancelled    { background: #f3f4f6; color: #374151; }
+        .status-in-progress  { background: #dbeafe; color: #1e40af; }
+        .status-completed    { background: #d1fae5; color: #065f46; }
+
+        /* ── QUICK ACTIONS ── */
+        .quick-action-btn {
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+        }
+
+        .quick-action-btn:hover { transform: translateY(-2px); }
+        .quick-action-btn i { font-size: 1.2rem; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 2.5rem 1.25rem;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+            display: block;
+        }
+
+        /* ── LOGOUT BTN ── */
+        .logout-btn {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            margin: 0 0.75rem;
+            border-radius: 0.625rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover { background: rgba(239,68,68,0.25); color: white; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in { animation: fadeInUp 0.5s ease forwards; }
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+        /* ── MOBILE HEADER ── */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+
+        /* ── SIDEBAR OVERLAY (mobile) ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show { display: block; }
+
+        /* ── MOBILE BREAKPOINT ── */
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+
+            .layout-container { flex-direction: column; }
+
+            /* On mobile the sidebar slides in over content */
+            .sidebar {
+                position: fixed !important;
+                top: 0; left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: var(--sidebar-width) !important;
+                min-width: var(--sidebar-width) !important;
+            }
+
+            .sidebar.show { transform: translateX(0) !important; }
+
+            /* Main content takes full width on mobile */
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding: 1rem;
+            }
+
+            .page-header { padding: 1.25rem 1rem; border-radius: 0.75rem; }
+            .page-header h2 { font-size: 1.3rem; }
+
+            .stat-card { margin-bottom: 0.75rem; }
+            .stat-card .stat-value { font-size: 1.25rem; }
+
+            .card { margin-bottom: 1rem; border-radius: 0.75rem; }
+
+            .quick-action-btn {
+                padding: 0.75rem 1rem;
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Mobile-friendly table: hide headers, show labels inline */
+            .tablemobile { display: block; }
+            .tablemobile thead { display: none; }
+
+            .tablemobile tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.5rem;
+                background: white;
+            }
+
+            .tablemobile tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #f1f5f9;
+                padding: 0.75rem 1rem;
+            }
+
+            .tablemobile tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #64748b;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+            }
+
+            .tablemobile tbody td:last-child { border-bottom: none; }
+        }
+
+        /* Mechanic availability — clear color per state instead of a single
+           washed-out grey for both Available and Not Available. */
+        .mech-avail-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .mech-avail-loading  { background: rgba(100,116,139,0.12); color: #64748b; }
+        .mech-avail-available   { background: rgba(16,185,129,0.15); color: #047857; }
+        .mech-avail-unavailable { background: rgba(239,68,68,0.15); color: #b91c1c; }
+        .mech-avail-error     { background: rgba(245,158,11,0.15); color: #b45309; }
+
+        .mech-avail-switch .form-check-input {
+            width: 3em;
+            height: 1.6em;
+            cursor: pointer;
+            background-color: #ef4444;
+            border-color: #ef4444;
+        }
+        .mech-avail-switch .form-check-input:checked {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+        .mech-avail-switch .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(16,185,129,0.25);
+        }
+    </style>
+
+    <script>
+        window.onload = function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        };
+
+        window.onpageshow = function(event) {
+            if (event.persisted) window.scrollTo(0, 0);
+        };
+    </script>
+
+    <!-- design-system.css loaded LAST so it cannot override layout rules above -->
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+            <div id="sidebarNav"></div>
+            <button class="btn btn-outline-light w-100 mt-3 mb-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                        <p>Welcome back! Here's your business overview.</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-white-50">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            <span id="currentDate"></span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4" id="statsContainer">
+                <!-- populated by JS -->
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-white d-flex align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-lightning me-2 text-warning"></i>Quick Actions</h5>
+                        </div>
+                        <div class="card-body py-4 px-3">
+                            <div class="row quick-actions g-2" id="quickActions">
+                                <!-- populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="mechanicAvailabilityPanel" style="display:none">
+                <div class="col-md-6 mb-4">
+                    <div class="card"><div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Availability</h5>
+                            <span id="mechanicAvailabilityText" class="mech-avail-badge mech-avail-loading">Loading…</span>
+                        </div>
+                        <div class="form-check form-switch fs-3 mb-0 mech-avail-switch">
+                            <input class="form-check-input" type="checkbox" id="mechanicAvailabilityToggle" onchange="setMechanicAvailability(this.checked)">
+                        </div>
+                    </div></div>
+                </div>
+            </div>
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-6 mb-4" id="recentAppointmentsPanel">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="bi bi-calendar-check me-2 text-info"></i>Recent Appointments</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 tablemobile">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentAppointments">
+                                        <tr><td colspan="3" class="text-center text-muted py-4">
+                                            <div class="spinner-border spinner-border-sm me-2"></div>Loading...
+                                        </td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="bi bi-clipboard-check me-2 text-success"></i>Active Job Orders</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 tablemobile">
+                                    <thead>
+                                        <tr>
+                                            <th>Job #</th>
+                                            <th>Vehicle</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activeJobOrders">
+                                        <tr><td colspan="3" class="text-center text-muted py-4">
+                                            <div class="spinner-border spinner-border-sm me-2"></div>Loading...
+                                        </td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div><!-- /.layout-container -->
+
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+        if (!authToken || authToken === 'null' || authToken === 'undefined') {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (user.role === 'customer') window.location.href = '/customer';
+
+        function buildAuthHeaders(extra = {}) {
+            return {
+                'Authorization': authToken ? `Bearer ${authToken}` : '',
+                ...extra
+            };
+        }
+
+        /* Sidebar comes from the shared automan-nav.js */
+
+        async function loadDashboard() {
+            if (user.role === 'mechanic') {
+                document.getElementById('recentAppointmentsPanel').style.display = 'none';
+                try {
+                    const res = await fetch(`${API_BASE}/job-orders`, { headers: buildAuthHeaders() });
+                    const jobs = await res.json();
+                    if (!res.ok) throw new Error(jobs.error || 'Failed to load jobs');
+                    const counts = { pending: 0, in_progress: 0, completed: 0 };
+                    jobs.forEach(job => {
+                        if (job.status === 'Pending') counts.pending++;
+                        if (job.status === 'In Progress') counts.in_progress++;
+                        if (job.status === 'Completed') counts.completed++;
+                    });
+                    renderStats({ appointments: {}, job_orders: counts, sales: {} });
+                } catch (error) { document.getElementById('statsContainer').innerHTML = '<div class="col-12 text-center py-4 text-muted">Unable to load assigned jobs</div>'; }
+                loadRecentData();
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/reports/dashboard`, {
+                    headers: buildAuthHeaders()
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 422) {
+                        const msg = (data.error || data.msg || '').toString().toLowerCase();
+                        if (msg.includes('authorization') || msg.includes('token') || msg.includes('signature')) {
+                            logout();
+                            return;
+                        }
+                    }
+                    throw new Error(data.error || data.msg || 'Failed to load dashboard');
+                }
+
+                renderStats(data);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('statsContainer').innerHTML = '<div class="col-12 text-center py-4 text-muted">Unable to load dashboard data</div>';
+            }
+            loadRecentData();
+        }
+
+        function renderStats(data) {
+            const statsContainer = document.getElementById('statsContainer');
+            if (!data || !data.appointments) {
+                statsContainer.innerHTML = '<div class="col-12 text-center py-4 text-muted">Unable to load dashboard data</div>';
+                return;
+            }
+
+            const appointments = data.appointments || {};
+            const jobOrders    = data.job_orders   || {};
+            const sales        = data.sales        || {};
+
+            let stats = [];
+
+            if (user.role === 'admin' || user.role === 'staff') {
+                stats = [
+                    { title: 'Pending Approvals', value: appointments.pending || 0,          icon: 'bi-hourglass-split',  color: 'warning', link: '/appointments', subtitle: 'Awaiting review' },
+                    { title: 'Total Appointments',value: appointments.total   || 0,          icon: 'bi-calendar-check',   color: 'primary', link: '/appointments' },
+                    { title: 'Active Job Orders', value: (jobOrders.pending||0)+(jobOrders.in_progress||0), icon: 'bi-clipboard-data', color: 'info', link: '/job-orders' },
+                    { title: 'Monthly Revenue',   value: 'PHP '+(sales.monthly_revenue||0).toLocaleString(), icon: 'bi-currency-dollar', color: 'success', link: '/sales' }
+                ];
+            } else if (user.role === 'mechanic') {
+                stats = [
+                    { title: 'Pending Jobs',    value: jobOrders.pending     || 0, icon: 'bi-clock',        color: 'warning', link: '/job-orders' },
+                    { title: 'In Progress',     value: jobOrders.in_progress || 0, icon: 'bi-gear',         color: 'info',    link: '/job-orders' },
+                    { title: 'Completed Today', value: jobOrders.completed   || 0, icon: 'bi-check-circle', color: 'success', link: '/job-orders' }
+                ];
+            }
+
+            const borderColors = { warning:'#f59e0b', success:'#10b981', info:'#3b82f6', primary:'#e53935' };
+
+            statsContainer.innerHTML = stats.map((stat, i) => `
+                <div class="col-md-3 col-sm-6 mb-3 animate-in delay-${i+1}">
+                    <a href="${stat.link}" class="text-decoration-none">
+                        <div class="stat-card h-100" style="border-top: 4px solid ${borderColors[stat.color]}">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="stat-label">${stat.title}</div>
+                                        <div class="stat-value mt-2">${stat.value}</div>
+                                        ${stat.subtitle ? `<div class="stat-subtitle mt-1">${stat.subtitle}</div>` : ''}
+                                    </div>
+                                    <div class="stat-icon ${stat.color}">
+                                        <i class="bi ${stat.icon}"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function setMechAvailText(text, stateClass) {
+            const el = document.getElementById('mechanicAvailabilityText');
+            el.textContent = text;
+            el.className = 'mech-avail-badge ' + stateClass;
+        }
+
+        async function loadMechanicAvailability() {
+            if (user.role !== 'mechanic' || !user.id) return;
+            document.getElementById('mechanicAvailabilityPanel').style.display = '';
+            try {
+                const response = await fetch(`${API_BASE}/users/${user.id}`, { headers: buildAuthHeaders() });
+                const mechanic = await response.json();
+                if (!response.ok) throw new Error(mechanic.error || 'Could not load availability');
+                const available = mechanic.availability === 'available';
+                document.getElementById('mechanicAvailabilityToggle').checked = available;
+                setMechAvailText(available ? 'Available' : 'Not Available', available ? 'mech-avail-available' : 'mech-avail-unavailable');
+            } catch (error) { setMechAvailText('Unable to load availability', 'mech-avail-error'); }
+        }
+
+        async function setMechanicAvailability(available) {
+            const toggle = document.getElementById('mechanicAvailabilityToggle');
+            const prior = !available;
+            toggle.disabled = true;
+            try {
+                const response = await fetch(`${API_BASE}/users/mechanics/${user.id}/availability`, {
+                    method: 'PUT', headers: { ...buildAuthHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ availability: available ? 'available' : 'not_available' })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not update availability');
+                setMechAvailText(available ? 'Available' : 'Not Available', available ? 'mech-avail-available' : 'mech-avail-unavailable');
+            } catch (error) {
+                toggle.checked = prior;
+                setMechAvailText('Update failed — status unchanged', 'mech-avail-error');
+                alert(error.message);
+            } finally { toggle.disabled = false; }
+        }
+
+        function renderQuickActions() {
+            const actions = [];
+            if (user.role === 'admin' || user.role === 'staff') {
+                actions.push(
+                    { text: 'New Appointment', icon: 'bi-plus-circle',  link: '/appointments', color: 'primary' },
+                    { text: 'New Job Order',   icon: 'bi-plus-square',  link: '/job-orders',   color: 'success' },
+                    { text: 'Add Inventory',   icon: 'bi-plus-box',     link: '/inventory',    color: 'info'    }
+                );
+            } else if (user.role === 'mechanic') {
+                actions.push({ text: 'View Job Orders', icon: 'bi-clipboard-list', link: '/job-orders', color: 'primary' });
+            }
+
+            document.getElementById('quickActions').innerHTML = actions.map(action => `
+                <div class="col-auto">
+                    <a href="${action.link}" class="btn quick-action-btn btn-outline-${action.color}">
+                        <i class="bi ${action.icon}"></i>${action.text}
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        async function loadRecentData() {
+            try {
+                if (user.role === 'mechanic') {
+                    const joRes = await fetch(`${API_BASE}/job-orders`, { headers: buildAuthHeaders() });
+                    if (!joRes.ok) return;
+                    const jobs = await joRes.json();
+                    document.getElementById('activeJobOrders').innerHTML = jobs.filter(j => j.status !== 'Completed').slice(0, 5).map(jo => `<tr><td><strong>${escapeHtml(jo.job_order_number)}</strong></td><td>${escapeHtml(jo.vehicle?.make || '')} ${escapeHtml(jo.vehicle?.model || '')}</td><td><span class="status-badge status-${jo.status.toLowerCase().replace(' ','-')}">${jo.status}</span></td></tr>`).join('') || '<tr><td colspan="3" class="text-center text-muted py-4">No active assignments</td></tr>';
+                    return;
+                }
+                const aptRes = await fetch(`${API_BASE}/appointments`, {
+                    headers: buildAuthHeaders()
+                });
+                if (aptRes.ok) {
+                    const appointments = await aptRes.json();
+                    if (!appointments.length) {
+                        document.getElementById('recentAppointments').innerHTML = `
+                            <tr><td colspan="3">
+                                <div class="empty-state">
+                                    <i class="bi bi-calendar-x"></i>
+                                    <span>No appointments found</span>
+                                </div>
+                            </td></tr>`;
+                    } else {
+                        document.getElementById('recentAppointments').innerHTML = appointments.slice(0,5).map(apt => `
+                            <tr>
+                                <td data-label="Customer"><strong>${escapeHtml(apt.customer?.name || 'N/A')}</strong></td>
+                                <td data-label="Date">${formatDate(apt.preferred_date)}</td>
+                                <td data-label="Status"><span class="status-badge status-${apt.status.toLowerCase()}">${apt.status}</span></td>
+                            </tr>`).join('');
+                    }
+                } else {
+                    const errorData = await aptRes.json().catch(() => ({}));
+                    const msg = (errorData.error || errorData.msg || '').toString().toLowerCase();
+                    if (aptRes.status === 401 || aptRes.status === 422) {
+                        if (msg.includes('authorization') || msg.includes('token') || msg.includes('signature')) {
+                            logout();
+                            return;
+                        }
+                    }
+                }
+
+                const joRes = await fetch(`${API_BASE}/job-orders`, {
+                    headers: buildAuthHeaders()
+                });
+                if (joRes.ok) {
+                    const jobOrders = await joRes.json();
+                    const active = jobOrders.filter(jo => jo.status !== 'Completed').slice(0,5);
+                    if (!active.length) {
+                        document.getElementById('activeJobOrders').innerHTML = `
+                            <tr><td colspan="3">
+                                <div class="empty-state">
+                                    <i class="bi bi-clipboard-x"></i>
+                                    <span>No active job orders</span>
+                                </div>
+                            </td></tr>`;
+                    } else {
+                        document.getElementById('activeJobOrders').innerHTML = active.map(jo => `
+                            <tr>
+                                <td data-label="Job #"><strong>${escapeHtml(jo.job_order_number)}</strong></td>
+                                <td data-label="Vehicle">${escapeHtml(jo.vehicle?.make||'')} ${escapeHtml(jo.vehicle?.model||'')}</td>
+                                <td data-label="Status"><span class="status-badge status-${jo.status.toLowerCase().replace(' ','-')}">${jo.status}</span></td>
+                            </tr>`).join('');
+                    }
+                } else {
+                    const errorData = await joRes.json().catch(() => ({}));
+                    const msg = (errorData.error || errorData.msg || '').toString().toLowerCase();
+                    if (joRes.status === 401 || joRes.status === 422) {
+                        if (msg.includes('authorization') || msg.includes('token') || msg.includes('signature')) {
+                            logout();
+                            return;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading recent data:', error);
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString('en-PH');
+        }
+
+        buildSidebar();
+        renderQuickActions();
+        loadDashboard();
+        loadMechanicAvailability();
+
+        // Same reasoning as appointments.html: a new booking is saved
+        // instantly, but this page's stats/recent-activity were only ever
+        // fetched once at load — poll so they don't go stale while the
+        // dashboard sits open. Skipped while any modal is open, and while a
+        // refresh from the previous tick is still in flight so a slow
+        // request can't pile up overlapping calls.
+        let dashboardRefreshInFlight = false;
+        const dashboardRefreshInterval = setInterval(async () => {
+            if (document.querySelector('.modal.show')) return;
+            if (dashboardRefreshInFlight) return;
+            dashboardRefreshInFlight = true;
+            try {
+                await loadDashboard();
+            } finally {
+                dashboardRefreshInFlight = false;
+            }
+        }, 8000);
+        window.addEventListener('beforeunload', () => clearInterval(dashboardRefreshInterval));
+    </script>
+</body>
+</html>

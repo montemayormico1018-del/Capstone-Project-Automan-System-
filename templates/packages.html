@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Packages - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --secondary-color: #e53935;
+            --secondary-light: #ff6b6b;
+            --bg-light: #f8fafc;
+            --border-radius: 16px;
+            --shadow-brand: 0 10px 25px rgba(229,57,53,0.25);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #0f0f10 0%, #1a1a1d 100%);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            color: white;
+            z-index: 10;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            padding: 0.875rem 1.25rem;
+            display: block;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            border-radius: 0 8px 8px 0;
+            margin: 4px 8px;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: white;
+            transform: translateX(4px);
+            box-shadow: var(--shadow-brand);
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin: 1rem;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .item-row {
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-header { display: none; }
+
+        @media (max-width: 992px) {
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.75rem 1rem;
+                background: var(--primary-color);
+                position: sticky;
+                top: 0;
+                z-index: 20;
+            }
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                transition: left 0.3s ease;
+                z-index: 30;
+            }
+            .sidebar.show { left: 0; }
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+
+        /* Package checklist items — a card per item instead of bare rows
+           with cramped default checkboxes, so items are easy to scan. */
+        .item-row-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .item-row-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .item-row-top .item-name { flex: 1; }
+        .item-remove-btn { flex-shrink: 0; }
+        .item-fuel-chips {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .item-fuel-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #64748b;
+            margin-right: 2px;
+        }
+        .fuel-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+            margin: 0;
+        }
+        .fuel-chip input { margin: 0; accent-color: var(--secondary-color, #e53935); cursor: pointer; }
+        .fuel-chip:has(input:checked) {
+            background: rgba(229, 57, 53, 0.08);
+            border-color: var(--secondary-color, #e53935);
+            color: var(--secondary-color, #e53935);
+        }
+
+        /* Section labels between the merged header and each list, replacing
+           what used to be a second full page-header per section. */
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #e53935;
+            margin: 4px 2px 10px;
+            padding-left: 10px;
+            border-left: 4px solid #e53935;
+        }
+
+        /* Services list: each top-level service is a card; its sub-services
+           live visually inside that same card (not as separate rows in a
+           flat table) so the parent/child relationship is obvious at a
+           glance, and a service with many sub-services can be collapsed.
+           The left border and category chip are colored per-category (see
+           categoryStyle() in JS) so the list is scannable at a glance
+           instead of reading as one flat block of gray-on-white rows. */
+        .service-card {
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid var(--cat-border, #cbd5e1);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .service-card:last-child { margin-bottom: 0; }
+        .service-card.inactive { background: #f8fafc; border-left-color: #cbd5e1; }
+        .category-chip {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 11px;
+            border-radius: 20px;
+            background: var(--cat-bg, #f1f5f9);
+            color: var(--cat-text, #475569);
+        }
+        .service-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+        }
+        .service-card-header.expandable { cursor: pointer; }
+        .service-card-header.expandable:hover { background: #f8fafc; }
+        .service-chevron {
+            flex-shrink: 0;
+            width: 20px;
+            text-align: center;
+            color: #94a3b8;
+            transition: transform 0.18s ease;
+        }
+        .service-chevron.open { transform: rotate(90deg); }
+        .service-card-name-wrap { flex: 1 1 260px; min-width: 0; }
+        .service-card-name { font-weight: 700; color: #0f172a; }
+        .service-card-name .inactive-text { color: #94a3b8; font-weight: 500; }
+        .service-card-subcount {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #64748b;
+            background: #eef2f7;
+            border-radius: 20px;
+            padding: 1px 9px;
+        }
+        .service-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 22px;
+            flex: 2 1 380px;
+            font-size: 0.83rem;
+            color: #475569;
+        }
+        .service-card-meta .meta-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #94a3b8;
+            display: block;
+        }
+        .service-card-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .service-subservices {
+            background: var(--cat-bg, #f8fafc);
+            border-top: 1px solid #e2e8f0;
+            padding: 6px 16px 6px 44px;
+        }
+        .service-subservices.collapsed { display: none; }
+        .service-subrow {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(100, 116, 139, 0.2);
+        }
+        .service-subrow:last-child { border-bottom: none; }
+        .service-subrow-name { flex: 1 1 220px; font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+        .service-subrow-name i { color: var(--cat-border, #cbd5e1); margin-right: 6px; }
+        .service-subrow-meta { flex: 2 1 300px; font-size: 0.8rem; color: #64748b; }
+        .service-subrow-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+    <header class="mobile-header">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="text-white"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+
+            <nav id="sidebarNav"></nav>
+
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h3><i class="bi bi-wrench-adjustable-circle me-2"></i>Services &amp; Packages</h3>
+                        <p class="text-muted mb-0">Manage individual services with their sub-services, bundled packages, and pricing</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-light" onclick="openServiceModal()"><i class="bi bi-plus-circle me-2"></i>Add Service</button>
+                        <button class="btn btn-outline-light" onclick="openServicePricing()"><i class="bi bi-currency-dollar me-2"></i>Regular Service Pricing</button>
+                        <button class="btn btn-light" onclick="openPackageModal()"><i class="bi bi-plus-circle me-2"></i>Add Package</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-label"><i class="bi bi-wrench-adjustable-circle me-2"></i>Services</div>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div id="servicesList">
+                        <div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-label"><i class="bi bi-box-seam me-2"></i>Service Packages</div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Base Price</th>
+                                    <th>Duration</th>
+                                    <th>Items</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packagesTable">
+                                <tr><td colspan="6" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Service Modal -->
+    <div class="modal fade" id="serviceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serviceModalTitle">Add Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="serviceId">
+                    <div class="mb-3">
+                        <label class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="serviceName" placeholder="e.g. Premium Oil Change" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="serviceDescription" rows="2" placeholder="Shown to customers when booking"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Category</label>
+                            <input type="text" class="form-control" id="serviceCategory" placeholder="e.g. Maintenance">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="serviceDuration" min="0">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Base Price (PHP)</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="servicePrice" required>
+                            <small class="text-muted">Used for Midsize vehicles.</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Small Vehicle Price</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="servicePriceSmall" placeholder="Defaults to Base Price">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Large Vehicle Price</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="servicePriceLarge" placeholder="Defaults to Base Price">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label d-block">Applicable To</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="serviceApplicableGasoline" checked>
+                            <label class="form-check-label" for="serviceApplicableGasoline">Gasoline</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="serviceApplicableDiesel" checked>
+                            <label class="form-check-label" for="serviceApplicableDiesel">Diesel</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="serviceApplicableHev" checked>
+                            <label class="form-check-label" for="serviceApplicableHev">HEV</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="serviceApplicablePhev" checked>
+                            <label class="form-check-label" for="serviceApplicablePhev">PHEV</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="serviceApplicableBev" checked>
+                            <label class="form-check-label" for="serviceApplicableBev">BEV</label>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="serviceActiveWrap" style="display:none;">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="serviceIsActive" checked>
+                            <label class="form-check-label" for="serviceIsActive">Active (visible to customers)</label>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Sub-Services <small class="text-muted fw-normal">(optional — e.g. Oil Change options)</small></h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addSubServiceRow()">
+                            <i class="bi bi-plus-lg me-1"></i>Add Sub-Service
+                        </button>
+                    </div>
+                    <div id="subServiceRowsContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveService()">Save Service</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Package Modal -->
+    <div class="modal fade" id="packageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="packageModalTitle">Add Package</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="packageId">
+                    <div class="mb-3">
+                        <label class="form-label">Package Name</label>
+                        <input type="text" class="form-control" id="packageName" placeholder="e.g. 21-Point Checkup Package" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="packageDescription" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Base Price (PHP)</label>
+                            <input type="number" step="0.01" class="form-control" id="packageBasePrice" required>
+                            <small class="text-muted">Used for Midsize vehicles, and as the default for Small/Large when no override is set.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estimated Duration (minutes)</label>
+                            <input type="number" class="form-control" id="packageDuration">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Small Vehicle Price (PHP)</label>
+                            <input type="number" step="0.01" class="form-control" id="packagePriceSmall" placeholder="Defaults to Base Price">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Large Vehicle Price (PHP)</label>
+                            <input type="number" step="0.01" class="form-control" id="packagePriceLarge" placeholder="Defaults to Base Price">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label d-block">Applicable To</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="packageApplicableGasoline" checked>
+                            <label class="form-check-label" for="packageApplicableGasoline">Gasoline</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="packageApplicableDiesel" checked>
+                            <label class="form-check-label" for="packageApplicableDiesel">Diesel</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="packageApplicableHev" checked>
+                            <label class="form-check-label" for="packageApplicableHev">HEV</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="packageApplicablePhev" checked>
+                            <label class="form-check-label" for="packageApplicablePhev">PHEV</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="packageApplicableBev" checked>
+                            <label class="form-check-label" for="packageApplicableBev">BEV</label>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Checklist Items</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addItemRow()">
+                            <i class="bi bi-plus-lg me-1"></i>Add Item
+                        </button>
+                    </div>
+                    <div id="itemRowsContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="savePackage()">Save Package</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+
+        if (!authToken) window.location.href = '/login';
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (!['admin', 'staff'].includes(user.role)) window.location.href = user.role === 'customer' ? '/customer' : '/dashboard';
+
+        buildSidebar();
+
+        // An expired/invalid JWT (sessions don't last forever) was leaving
+        // admins staring at a page that silently failed to load anything —
+        // "Error loading services"/"Error loading packages" in the console,
+        // nothing on screen — with no indication why. Same check used by
+        // inventory.html: bounce back to login instead of failing silently.
+        function sessionExpired(response, data) {
+            if (response.status !== 401 && response.status !== 422) return false;
+            const msg = (data?.error || data?.msg || '').toString().toLowerCase();
+            if (response.status === 401 || msg.includes('authorization') || msg.includes('token') || msg.includes('signature')) {
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('refresh_token');
+                sessionStorage.removeItem('user');
+                window.location.href = '/login';
+                return true;
+            }
+            return false;
+        }
+
+        let allPackages = [];
+        let allServices = [];
+        let itemRowCounter = 0;
+        let subServiceRowCounter = 0;
+
+        function fmtMoney(n) {
+            return Number(n || 0).toLocaleString();
+        }
+
+        // Every category gets a consistent, distinct color (hashed from its
+        // name, since categories are free text — see routes/inventory.py's
+        // equivalent problem — rather than a hardcoded list that would miss
+        // whatever an admin types next). Same category always gets the same
+        // color, so the list is scannable by type instead of reading as one
+        // flat block of gray-on-white rows.
+        const CATEGORY_PALETTE = [
+            { bg: '#eff6ff', border: '#3b82f6', text: '#1d4ed8' },
+            { bg: '#f0fdf4', border: '#10b981', text: '#047857' },
+            { bg: '#fff7ed', border: '#f97316', text: '#c2410c' },
+            { bg: '#faf5ff', border: '#a855f7', text: '#7e22ce' },
+            { bg: '#fdf2f8', border: '#ec4899', text: '#be185d' },
+            { bg: '#ecfeff', border: '#06b6d4', text: '#0e7490' },
+            { bg: '#fefce8', border: '#ca8a04', text: '#854d0e' },
+        ];
+        const FALLBACK_CATEGORY_STYLE = { bg: '#f1f5f9', border: '#94a3b8', text: '#475569' };
+        function categoryStyle(category) {
+            if (!category) return FALLBACK_CATEGORY_STYLE;
+            let hash = 0;
+            for (let i = 0; i < category.length; i++) hash = (hash * 31 + category.charCodeAt(i)) >>> 0;
+            return CATEGORY_PALETTE[hash % CATEGORY_PALETTE.length];
+        }
+
+        async function loadServicesTable() {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/services?include_inactive=true`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const body = await response.json().catch(() => null);
+                if (sessionExpired(response, body)) return;
+                if (!response.ok) throw new Error('Failed to load services');
+                allServices = body;
+
+                // The API returns a flat list (parent_id links sub-services to
+                // their parent) — group here so each parent's sub-services can
+                // render nested inside its own card instead of as separate,
+                // same-level rows in a flat table.
+                const topLevel = allServices.filter(s => !s.parent_id);
+                const subsByParent = {};
+                allServices.filter(s => s.parent_id).forEach(s => {
+                    (subsByParent[s.parent_id] = subsByParent[s.parent_id] || []).push(s);
+                });
+
+                const priceLine = (s, hasSubs) =>
+                    // A parent that's purely a grouping container (e.g. "Oil
+                    // Change" holding "Premium"/"Semi-Synthetic"/"Mineral" as
+                    // the real bookable options) is never itself priced —
+                    // "PHP 0 / 0 / 0" read as broken data, not "not
+                    // applicable", so say so explicitly instead.
+                    (hasSubs && !s.price && !s.price_small && !s.price_large)
+                        ? '<span class="text-muted">Grouping only — see options below</span>'
+                        : `PHP ${fmtMoney(s.price)} <span class="text-muted">med</span> &nbsp;/&nbsp; ${fmtMoney(s.price_small ?? s.price)} <span class="text-muted">small</span> &nbsp;/&nbsp; ${fmtMoney(s.price_large ?? s.price)} <span class="text-muted">large</span>`;
+
+                const renderSubRow = sub => `
+                    <div class="service-subrow ${sub.is_active ? '' : 'text-muted'}">
+                        <div class="service-subrow-name"><i class="bi bi-arrow-return-right"></i>${escapeHtml(sub.name)}${sub.is_active ? '' : ' <span class="badge bg-secondary">Inactive</span>'}</div>
+                        <div class="service-subrow-meta">${priceLine(sub, false)}${sub.duration_minutes ? ` &nbsp;·&nbsp; ${sub.duration_minutes} mins` : ''}</div>
+                        <div class="service-subrow-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="openServiceModal('${sub.id}')">Edit</button>
+                            ${sub.is_active
+                                ? `<button class="btn btn-sm btn-outline-danger" onclick="deactivateService('${sub.id}')">Deactivate</button>`
+                                : `<button class="btn btn-sm btn-outline-success" onclick="reactivateService('${sub.id}')">Reactivate</button>`}
+                        </div>
+                    </div>`;
+
+                const renderCard = s => {
+                    const subs = subsByParent[s.id] || [];
+                    const hasSubs = subs.length > 0;
+                    const cardId = `svccard_${s.id}`;
+                    const cat = categoryStyle(s.category);
+                    const catVars = s.is_active
+                        ? `--cat-border:${cat.border};--cat-bg:${cat.bg};--cat-text:${cat.text};`
+                        : '';
+                    return `
+                    <div class="service-card ${s.is_active ? '' : 'inactive'}" style="${catVars}">
+                        <div class="service-card-header ${hasSubs ? 'expandable' : ''}" ${hasSubs ? `onclick="toggleServiceCard('${s.id}')"` : ''}>
+                            ${hasSubs ? `<i class="bi bi-chevron-right service-chevron open" id="chevron_${s.id}"></i>` : '<span class="service-chevron"></span>'}
+                            <div class="service-card-name-wrap">
+                                <span class="service-card-name ${s.is_active ? '' : 'inactive-text'}">${escapeHtml(s.name)}</span>
+                                ${hasSubs ? `<span class="service-card-subcount">${subs.length} sub-service${subs.length > 1 ? 's' : ''}</span>` : ''}
+                                ${s.is_active ? '' : '<span class="badge bg-secondary ms-2">Inactive</span>'}
+                            </div>
+                            <div class="service-card-meta">
+                                <div><span class="meta-label">Category</span>${s.category ? '<span class="category-chip">' + escapeHtml(s.category) + '</span>' : '—'}</div>
+                                <div><span class="meta-label">Price</span>${priceLine(s, hasSubs)}</div>
+                                <div><span class="meta-label">Duration</span>${s.duration_minutes ? s.duration_minutes + ' mins' : '—'}</div>
+                            </div>
+                            <div class="service-card-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-sm btn-primary" onclick="openServiceModal('${s.id}')">Edit</button>
+                                ${s.is_active
+                                    ? `<button class="btn btn-sm btn-outline-danger" onclick="deactivateService('${s.id}')">Deactivate</button>`
+                                    : `<button class="btn btn-sm btn-success" onclick="reactivateService('${s.id}')">Reactivate</button>`}
+                            </div>
+                        </div>
+                        ${hasSubs ? `<div class="service-subservices" id="${cardId}">${subs.map(renderSubRow).join('')}</div>` : ''}
+                    </div>`;
+                };
+
+                document.getElementById('servicesList').innerHTML = topLevel.map(renderCard).join('') ||
+                    '<p class="text-center text-muted mb-0 py-4">No services yet</p>';
+            } catch (error) {
+                console.error('Error loading services:', error);
+                document.getElementById('servicesList').innerHTML = '<p class="text-center text-danger mb-0 py-4">Failed to load services</p>';
+            }
+        }
+
+        function toggleServiceCard(serviceId) {
+            document.getElementById(`svccard_${serviceId}`).classList.toggle('collapsed');
+            document.getElementById(`chevron_${serviceId}`).classList.toggle('open');
+        }
+
+        async function deactivateService(serviceId) {
+            const result = await Swal.fire({
+                title: 'Automan',
+                text: 'Deactivate this service? It will no longer be bookable by customers.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, deactivate',
+                cancelButtonText: 'Cancel'
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const response = await fetch(`${API_BASE}/appointments/services/${serviceId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.ok) {
+                    Swal.fire({ title: 'Automan', text: 'Service deactivated.', icon: 'success' });
+                    loadServicesTable();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    Swal.fire({ title: 'Automan', text: err.error || 'Failed to deactivate service', icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error deactivating service', icon: 'error' });
+            }
+        }
+
+        async function reactivateService(serviceId) {
+            try {
+                const response = await fetch(`${API_BASE}/appointments/services/${serviceId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ is_active: true })
+                });
+                if (response.ok) {
+                    Swal.fire({ title: 'Automan', text: 'Service reactivated.', icon: 'success' });
+                    loadServicesTable();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    Swal.fire({ title: 'Automan', text: err.error || 'Failed to reactivate service', icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error reactivating service', icon: 'error' });
+            }
+        }
+
+        function renderSubServiceRow(sub) {
+            sub = sub || {};
+            const rowId = sub.id ? `existing_${sub.id}` : `new_${subServiceRowCounter++}`;
+            return `
+                <div class="item-row-card ${sub.id && sub.is_active === false ? 'opacity-50' : ''}" id="subrow_${rowId}" data-service-id="${sub.id || ''}">
+                    <div class="item-row-top">
+                        <input type="text" class="form-control form-control-sm subsvc-name" placeholder="Sub-service name (e.g. Synthetic Oil)" value="${escapeHtml(sub.name || '')}">
+                        ${sub.id && sub.is_active === false ? '<span class="badge bg-secondary me-1">Inactive</span>' : ''}
+                        <button type="button" class="btn btn-sm btn-outline-danger item-remove-btn" title="Remove" onclick="removeSubServiceRow('${rowId}', ${sub.id ? `'${sub.id}'` : 'null'})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="form-control form-control-sm subsvc-description mt-2" placeholder="Description (optional)" value="${escapeHtml(sub.description || '')}">
+                    <div class="row mt-2 g-2">
+                        <div class="col-4">
+                            <input type="number" step="0.01" min="0" class="form-control form-control-sm subsvc-price" placeholder="Price (Med)" value="${sub.price ?? ''}">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" step="0.01" min="0" class="form-control form-control-sm subsvc-price-small" placeholder="Small" value="${sub.price_small ?? ''}">
+                        </div>
+                        <div class="col-4">
+                            <input type="number" step="0.01" min="0" class="form-control form-control-sm subsvc-price-large" placeholder="Large" value="${sub.price_large ?? ''}">
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function addSubServiceRow(sub) {
+            const container = document.getElementById('subServiceRowsContainer');
+            container.insertAdjacentHTML('beforeend', renderSubServiceRow(sub || {}));
+        }
+
+        async function removeSubServiceRow(rowId, serviceId) {
+            if (serviceId) {
+                const result = await Swal.fire({
+                    title: 'Automan',
+                    text: 'Deactivate this sub-service?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, deactivate',
+                    cancelButtonText: 'Cancel'
+                });
+                if (!result.isConfirmed) return;
+                try {
+                    await fetch(`${API_BASE}/appointments/services/${serviceId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                } catch (error) {
+                    console.error('Error deactivating sub-service:', error);
+                }
+            }
+            const row = document.getElementById(`subrow_${rowId}`);
+            if (row) row.remove();
+        }
+
+        function readSubServiceRow(row) {
+            const priceSmall = row.querySelector('.subsvc-price-small').value;
+            const priceLarge = row.querySelector('.subsvc-price-large').value;
+            return {
+                name: row.querySelector('.subsvc-name').value.trim(),
+                description: row.querySelector('.subsvc-description').value.trim(),
+                price: parseFloat(row.querySelector('.subsvc-price').value),
+                price_small: priceSmall !== '' ? parseFloat(priceSmall) : null,
+                price_large: priceLarge !== '' ? parseFloat(priceLarge) : null
+            };
+        }
+
+        function openServiceModal(serviceId) {
+            document.getElementById('subServiceRowsContainer').innerHTML = '';
+            document.getElementById('serviceId').value = '';
+            document.getElementById('serviceName').value = '';
+            document.getElementById('serviceDescription').value = '';
+            document.getElementById('serviceCategory').value = '';
+            document.getElementById('serviceDuration').value = '';
+            document.getElementById('servicePrice').value = '';
+            document.getElementById('servicePriceSmall').value = '';
+            document.getElementById('servicePriceLarge').value = '';
+            document.getElementById('serviceActiveWrap').style.display = 'none';
+            ['Gasoline', 'Diesel', 'Hev', 'Phev', 'Bev'].forEach(f => {
+                document.getElementById(`serviceApplicable${f}`).checked = true;
+            });
+
+            if (serviceId) {
+                const svc = allServices.find(s => s.id === serviceId);
+                if (!svc) return;
+                document.getElementById('serviceModalTitle').textContent = svc.parent_id ? 'Edit Sub-Service' : 'Edit Service';
+                document.getElementById('serviceId').value = svc.id;
+                document.getElementById('serviceName').value = svc.name || '';
+                document.getElementById('serviceDescription').value = svc.description || '';
+                document.getElementById('serviceCategory').value = svc.category || '';
+                document.getElementById('serviceDuration').value = svc.duration_minutes || '';
+                document.getElementById('servicePrice').value = svc.price ?? '';
+                document.getElementById('servicePriceSmall').value = svc.price_small ?? '';
+                document.getElementById('servicePriceLarge').value = svc.price_large ?? '';
+                document.getElementById('serviceApplicableGasoline').checked = svc.applicable_gasoline !== false;
+                document.getElementById('serviceApplicableDiesel').checked = svc.applicable_diesel !== false;
+                document.getElementById('serviceApplicableHev').checked = svc.applicable_hev !== false;
+                document.getElementById('serviceApplicablePhev').checked = svc.applicable_phev !== false;
+                document.getElementById('serviceApplicableBev').checked = svc.applicable_bev !== false;
+                document.getElementById('serviceActiveWrap').style.display = 'block';
+                document.getElementById('serviceIsActive').checked = svc.is_active !== false;
+                if (!svc.parent_id) {
+                    allServices.filter(s => s.parent_id === svc.id).forEach(sub => addSubServiceRow(sub));
+                }
+            } else {
+                document.getElementById('serviceModalTitle').textContent = 'Add Service';
+            }
+
+            new bootstrap.Modal(document.getElementById('serviceModal')).show();
+        }
+
+        async function saveService() {
+            const serviceId = document.getElementById('serviceId').value;
+            const name = document.getElementById('serviceName').value.trim();
+            const price = parseFloat(document.getElementById('servicePrice').value);
+
+            if (!name || isNaN(price) || price < 0) {
+                Swal.fire({ title: 'Automan', text: 'Service name and a non-negative base price are required', icon: 'warning' });
+                return;
+            }
+
+            const smallVal = document.getElementById('servicePriceSmall').value;
+            const largeVal = document.getElementById('servicePriceLarge').value;
+
+            const serviceData = {
+                name,
+                description: document.getElementById('serviceDescription').value.trim(),
+                category: document.getElementById('serviceCategory').value.trim(),
+                price,
+                price_small: smallVal !== '' ? parseFloat(smallVal) : null,
+                price_large: largeVal !== '' ? parseFloat(largeVal) : null,
+                duration_minutes: parseInt(document.getElementById('serviceDuration').value) || null,
+                applicable_gasoline: document.getElementById('serviceApplicableGasoline').checked,
+                applicable_diesel: document.getElementById('serviceApplicableDiesel').checked,
+                applicable_hev: document.getElementById('serviceApplicableHev').checked,
+                applicable_phev: document.getElementById('serviceApplicablePhev').checked,
+                applicable_bev: document.getElementById('serviceApplicableBev').checked
+            };
+            if (serviceId) {
+                serviceData.is_active = document.getElementById('serviceIsActive').checked;
+            }
+
+            const rows = Array.from(document.querySelectorAll('#subServiceRowsContainer .item-row-card'));
+            const newRows = rows.filter(row => !row.dataset.serviceId);
+            const newSubsPayload = [];
+            for (const row of newRows) {
+                const sub = readSubServiceRow(row);
+                if (!sub.name && isNaN(sub.price)) continue; // an untouched blank row the user added then didn't use
+                if (!sub.name || isNaN(sub.price) || sub.price < 0) {
+                    // This used to be dropped silently here, with the save
+                    // still reporting "Service saved successfully!" — the
+                    // sub-service just never existed and nothing said why.
+                    Swal.fire({ title: 'Automan', text: `Sub-service "${sub.name || '(untitled)'}" needs both a name and a non-negative price before it can be saved.`, icon: 'warning' });
+                    return;
+                }
+                newSubsPayload.push(sub);
+            }
+
+            // Existing sub-service rows being edited need the same guard —
+            // an emptied-out price on a row that's already saved would
+            // otherwise get PUT straight through.
+            const existingRows = rows.filter(r => r.dataset.serviceId);
+            for (const row of existingRows) {
+                const sub = readSubServiceRow(row);
+                if (!sub.name || isNaN(sub.price) || sub.price < 0) {
+                    Swal.fire({ title: 'Automan', text: `Sub-service "${sub.name || '(untitled)'}" needs both a name and a non-negative price.`, icon: 'warning' });
+                    return;
+                }
+            }
+
+            try {
+                if (serviceId) {
+                    const response = await fetch(`${API_BASE}/appointments/services/${serviceId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                        body: JSON.stringify(serviceData)
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Failed to update service');
+                    }
+
+                    // Update existing sub-service rows and add new ones — in
+                    // parallel, same reasoning as savePackage()'s item rows.
+                    const subRequests = [
+                        ...existingRows.map(row =>
+                            fetch(`${API_BASE}/appointments/services/${row.dataset.serviceId}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                                body: JSON.stringify(readSubServiceRow(row))
+                            })
+                        ),
+                        ...newSubsPayload.map(subData =>
+                            fetch(`${API_BASE}/appointments/services`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                                body: JSON.stringify({ ...subData, parent_id: serviceId })
+                            })
+                        )
+                    ];
+                    const results = await Promise.all(subRequests);
+                    if (results.some(r => !r.ok)) throw new Error('Service saved, but a sub-service failed to save');
+                } else {
+                    serviceData.sub_services = newSubsPayload;
+                    const response = await fetch(`${API_BASE}/appointments/services`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                        body: JSON.stringify(serviceData)
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Failed to create service');
+                    }
+                }
+
+                Swal.fire({ title: 'Automan', text: 'Service saved successfully!', icon: 'success' });
+                bootstrap.Modal.getInstance(document.getElementById('serviceModal')).hide();
+                loadServicesTable();
+            } catch (error) {
+                console.error('Error saving service:', error);
+                Swal.fire({ title: 'Automan', text: error.message || 'Error saving service', icon: 'error' });
+            }
+        }
+
+        async function loadPackagesTable() {
+            try {
+                const response = await fetch(`${API_BASE}/packages`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                const body = await response.json().catch(() => null);
+                if (sessionExpired(response, body)) return;
+                if (!response.ok) throw new Error('Failed to load packages');
+                allPackages = body;
+
+                document.getElementById('packagesTable').innerHTML = allPackages.map(p => `
+                    <tr>
+                        <td>${escapeHtml(p.name)}</td>
+                        <td>
+                            PHP ${Number(p.base_price || 0).toLocaleString()}
+                            <br><small class="text-muted">S: ${Number(p.price_small ?? p.base_price ?? 0).toLocaleString()} · L: ${Number(p.price_large ?? p.base_price ?? 0).toLocaleString()}</small>
+                        </td>
+                        <td>${p.estimated_duration_minutes ? p.estimated_duration_minutes + ' mins' : '-'}</td>
+                        <td>${(p.items || []).length} items</td>
+                        <td><span class="badge ${p.is_active ? 'bg-success' : 'bg-secondary'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="openPackageModal('${p.id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePackage('${p.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('') || '<tr><td colspan="6" class="text-center text-muted">No packages yet</td></tr>';
+            } catch (error) {
+                console.error('Error loading packages:', error);
+                document.getElementById('packagesTable').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load packages</td></tr>';
+            }
+        }
+
+        function renderItemRow(item) {
+            const rowId = item.id ? `existing_${item.id}` : `new_${itemRowCounter++}`;
+            const flags = ['gasoline', 'diesel', 'hev', 'phev', 'bev'];
+            return `
+                <div class="item-row-card" id="row_${rowId}" data-item-id="${item.id || ''}">
+                    <div class="item-row-top">
+                        <input type="text" class="form-control form-control-sm item-name" placeholder="Item name (e.g. Engine oil change)" value="${escapeHtml(item.item_name || '')}">
+                        <button type="button" class="btn btn-sm btn-outline-danger item-remove-btn" title="Remove item" onclick="removeItemRow('${rowId}', ${item.id ? `'${item.id}'` : 'null'})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <input type="text" class="form-control form-control-sm item-description mt-2" placeholder="Description (optional)" value="${escapeHtml(item.item_description || '')}">
+                    <div class="item-fuel-chips">
+                        <span class="item-fuel-label">Applicable to</span>
+                        ${flags.map(f => `
+                            <label class="fuel-chip">
+                                <input type="checkbox" class="item-flag-${f}" ${item[`applicable_${f}`] !== false ? 'checked' : ''}>
+                                <span>${f.toUpperCase()}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function addItemRow(item) {
+            const container = document.getElementById('itemRowsContainer');
+            container.insertAdjacentHTML('beforeend', renderItemRow(item || {}));
+        }
+
+        async function removeItemRow(rowId, itemId) {
+            if (itemId) {
+                const result = await Swal.fire({
+                    title: 'Automan',
+                    text: 'Delete this checklist item?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it',
+                    cancelButtonText: 'Cancel'
+                });
+                if (!result.isConfirmed) return;
+                try {
+                    await fetch(`${API_BASE}/packages/items/${itemId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                } catch (error) {
+                    console.error('Error deleting item:', error);
+                }
+            }
+            const row = document.getElementById(`row_${rowId}`);
+            if (row) row.remove();
+        }
+
+        function openPackageModal(packageId) {
+            document.getElementById('itemRowsContainer').innerHTML = '';
+            document.getElementById('packageId').value = '';
+            document.getElementById('packageName').value = '';
+            document.getElementById('packageDescription').value = '';
+            document.getElementById('packageBasePrice').value = '';
+            document.getElementById('packagePriceSmall').value = '';
+            document.getElementById('packagePriceLarge').value = '';
+            document.getElementById('packageDuration').value = '';
+            ['Gasoline', 'Diesel', 'Hev', 'Phev', 'Bev'].forEach(f => {
+                document.getElementById(`packageApplicable${f}`).checked = true;
+            });
+
+            if (packageId) {
+                const pkg = allPackages.find(p => p.id === packageId);
+                if (!pkg) return;
+                document.getElementById('packageModalTitle').textContent = 'Edit Package';
+                document.getElementById('packageId').value = pkg.id;
+                document.getElementById('packageName').value = pkg.name || '';
+                document.getElementById('packageDescription').value = pkg.description || '';
+                document.getElementById('packageBasePrice').value = pkg.base_price || '';
+                document.getElementById('packagePriceSmall').value = pkg.price_small ?? '';
+                document.getElementById('packagePriceLarge').value = pkg.price_large ?? '';
+                document.getElementById('packageDuration').value = pkg.estimated_duration_minutes || '';
+                document.getElementById('packageApplicableGasoline').checked = pkg.applicable_gasoline !== false;
+                document.getElementById('packageApplicableDiesel').checked = pkg.applicable_diesel !== false;
+                document.getElementById('packageApplicableHev').checked = pkg.applicable_hev !== false;
+                document.getElementById('packageApplicablePhev').checked = pkg.applicable_phev !== false;
+                document.getElementById('packageApplicableBev').checked = pkg.applicable_bev !== false;
+                (pkg.items || []).forEach(item => addItemRow(item));
+            } else {
+                document.getElementById('packageModalTitle').textContent = 'Add Package';
+            }
+
+            new bootstrap.Modal(document.getElementById('packageModal')).show();
+        }
+
+        async function savePackage() {
+            const packageId = document.getElementById('packageId').value;
+            const name = document.getElementById('packageName').value.trim();
+            const basePrice = parseFloat(document.getElementById('packageBasePrice').value);
+
+            if (!name || isNaN(basePrice)) {
+                Swal.fire({ title: 'Automan', text: 'Package name and base price are required', icon: 'warning' });
+                return;
+            }
+
+            const smallPriceVal = document.getElementById('packagePriceSmall').value;
+            const largePriceVal = document.getElementById('packagePriceLarge').value;
+
+            const packageData = {
+                name,
+                description: document.getElementById('packageDescription').value,
+                base_price: basePrice,
+                price_small: smallPriceVal !== '' ? parseFloat(smallPriceVal) : null,
+                price_large: largePriceVal !== '' ? parseFloat(largePriceVal) : null,
+                estimated_duration_minutes: parseInt(document.getElementById('packageDuration').value) || null,
+                applicable_gasoline: document.getElementById('packageApplicableGasoline').checked,
+                applicable_diesel: document.getElementById('packageApplicableDiesel').checked,
+                applicable_hev: document.getElementById('packageApplicableHev').checked,
+                applicable_phev: document.getElementById('packageApplicablePhev').checked,
+                applicable_bev: document.getElementById('packageApplicableBev').checked
+            };
+
+            const rows = Array.from(document.querySelectorAll('#itemRowsContainer .item-row-card'));
+            const newItemsPayload = rows
+                .filter(row => !row.dataset.itemId)
+                .map(row => readItemRow(row));
+
+            try {
+                let targetPackageId = packageId;
+
+                if (packageId) {
+                    const response = await fetch(`${API_BASE}/packages/${packageId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                        body: JSON.stringify(packageData)
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Failed to update package');
+                    }
+
+                    // Update existing item rows and add new ones — in parallel,
+                    // not one-at-a-time. A package with 20+ checklist items was
+                    // taking several seconds to save because every row waited
+                    // for the previous row's request to finish first.
+                    const itemRequests = [
+                        ...rows.filter(r => r.dataset.itemId).map(row =>
+                            fetch(`${API_BASE}/packages/items/${row.dataset.itemId}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                                body: JSON.stringify(readItemRow(row))
+                            })
+                        ),
+                        ...newItemsPayload.filter(i => i.item_name).map(itemData =>
+                            fetch(`${API_BASE}/packages/${packageId}/items`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                                body: JSON.stringify(itemData)
+                            })
+                        )
+                    ];
+                    await Promise.all(itemRequests);
+                } else {
+                    packageData.items = newItemsPayload.filter(i => i.item_name);
+                    const response = await fetch(`${API_BASE}/packages`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                        body: JSON.stringify(packageData)
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || 'Failed to create package');
+                    }
+                }
+
+                Swal.fire({ title: 'Automan', text: 'Package saved successfully!', icon: 'success' });
+                bootstrap.Modal.getInstance(document.getElementById('packageModal')).hide();
+                loadPackagesTable();
+            } catch (error) {
+                console.error('Error saving package:', error);
+                Swal.fire({ title: 'Automan', text: error.message || 'Error saving package', icon: 'error' });
+            }
+        }
+
+        function readItemRow(row) {
+            return {
+                item_name: row.querySelector('.item-name').value.trim(),
+                item_description: row.querySelector('.item-description').value.trim(),
+                applicable_gasoline: row.querySelector('.item-flag-gasoline').checked,
+                applicable_diesel: row.querySelector('.item-flag-diesel').checked,
+                applicable_hev: row.querySelector('.item-flag-hev').checked,
+                applicable_phev: row.querySelector('.item-flag-phev').checked,
+                applicable_bev: row.querySelector('.item-flag-bev').checked
+            };
+        }
+
+        async function deletePackage(packageId) {
+            const result = await Swal.fire({
+                title: 'Automan',
+                text: 'Are you sure you want to delete this package?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it',
+                cancelButtonText: 'Cancel'
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/packages/${packageId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.ok) {
+                    Swal.fire({ title: 'Automan', text: 'Package deleted successfully!', icon: 'success' });
+                    loadPackagesTable();
+                } else {
+                    const error = await response.json();
+                    Swal.fire({ title: 'Automan', text: error.error || 'Failed to delete package', icon: 'error' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'Automan', text: 'Error deleting package', icon: 'error' });
+            }
+        }
+
+        async function openServicePricing() {
+            if (user.role !== 'admin') { Swal.fire({ title: 'Automan', text: 'Only an admin can change pricing.', icon: 'warning' }); return; }
+            try {
+                const [servicesResponse, settingsResponse] = await Promise.all([
+                    fetch(`${API_BASE}/appointments/services`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+                    fetch(`${API_BASE}/appointments/pricing-settings`, { headers: { 'Authorization': `Bearer ${authToken}` } })
+                ]);
+                const services = await servicesResponse.json();
+                const settings = await settingsResponse.json();
+                if (!servicesResponse.ok || !settingsResponse.ok) throw new Error('Unable to load pricing');
+
+                // Flat list from the API — order it parent-then-its-sub-services
+                // instead of whatever order Firestore happens to return, so a
+                // sub-service's row doesn't look like an unrelated top-level one.
+                const topLevel = services.filter(s => !s.parent_id);
+                const subsByParent = {};
+                services.filter(s => s.parent_id).forEach(s => {
+                    (subsByParent[s.parent_id] = subsByParent[s.parent_id] || []).push(s);
+                });
+                const ordered = topLevel.flatMap(s => [s, ...(subsByParent[s.id] || [])]);
+
+                const rowHtml = s => `<tr><td>${s.parent_id ? '&#8627; ' : ''}${escapeHtml(s.name)}</td><td><input class="form-control form-control-sm ps-mid" data-id="${s.id}" type="number" min="0" value="${s.price || 0}"></td><td><input class="form-control form-control-sm ps-small" data-id="${s.id}" type="number" min="0" value="${s.price_small ?? s.price ?? 0}"></td><td><input class="form-control form-control-sm ps-large" data-id="${s.id}" type="number" min="0" value="${s.price_large ?? s.price ?? 0}"></td></tr>`;
+                const rows = ordered.map(rowHtml).join('');
+                const result = await Swal.fire({ title: 'Regular Service Pricing', width: '900px', showCancelButton: true, confirmButtonText: 'Save pricing', html: `<p class="text-muted small">Prices are saved to Cloud Firestore. Medium is the base price. Indented rows are sub-services.</p><div class="table-responsive"><table class="table table-sm"><thead><tr><th>Service</th><th>Medium</th><th>Small</th><th>Large</th></tr></thead><tbody>${rows}</tbody></table></div><label class="form-label">Quotation markup (PHP)</label><input id="quotationMarkup" type="number" min="0" class="form-control" value="${settings.quotation_markup || 0}">`, preConfirm: () => ({ markup: document.getElementById('quotationMarkup').value, services: services.map(s => ({ id: s.id, price: document.querySelector(`.ps-mid[data-id="${s.id}"]`).value, price_small: document.querySelector(`.ps-small[data-id="${s.id}"]`).value, price_large: document.querySelector(`.ps-large[data-id="${s.id}"]`).value })) }) });
+                if (!result.value) return;
+                const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
+                const requests = result.value.services.map(s => fetch(`${API_BASE}/appointments/services/${s.id}`, { method: 'PUT', headers, body: JSON.stringify(s) }));
+                requests.push(fetch(`${API_BASE}/appointments/pricing-settings`, { method: 'PUT', headers, body: JSON.stringify({ quotation_markup: result.value.markup }) }));
+                const saved = await Promise.all(requests);
+                if (saved.some(r => !r.ok)) throw new Error('Some prices could not be saved');
+                Swal.fire({ title: 'Automan', text: 'Service prices and quotation markup saved.', icon: 'success' });
+            } catch (error) { Swal.fire({ title: 'Automan', text: error.message || 'Unable to save pricing', icon: 'error' }); }
+        }
+
+        loadServicesTable();
+        loadPackagesTable();
+    </script>
+</body>
+</html>

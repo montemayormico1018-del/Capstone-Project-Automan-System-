@@ -1,0 +1,24 @@
+Flask==3.0.0
+Flask-Bcrypt==1.0.1
+Flask-Compress==1.15
+python-dotenv==1.0.0
+Werkzeug==3.0.1
+requests==2.33.1
+python-dateutil==2.9.0.post0
+
+# IANA timezone database for zoneinfo (routes/appointments.py's
+# Asia/Manila "has this slot passed" check). Linux/Cloud Run usually has
+# system tzdata already and would work without this, but Windows has no
+# built-in IANA database at all -- zoneinfo.ZoneInfoNotFoundError without
+# it. Pure Python, no C extensions, safe on every platform either way.
+tzdata==2026.4
+
+# Firebase
+firebase-admin==6.5.0
+google-cloud-firestore==2.17.0
+
+# Production server
+gunicorn==23.0.0
+
+# Testing
+pytest==9.1.1

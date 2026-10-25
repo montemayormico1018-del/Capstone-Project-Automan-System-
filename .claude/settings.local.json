@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(pip install python-docx --quiet 2>$null)",
+      "PowerShell(python \"C:\\\\Users\\\\monte\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-monte-OneDrive-Desktop-automan-system\\\\b031318c-efc9-4eae-b734-5e1e026871e8\\\\scratchpad\\\\make_kb_docx.py\")"
+    ]
+  }
+}

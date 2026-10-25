@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Automan Car Care Center</title>
+    <meta name="theme-color" content="#0f0f10">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0f0f10;
+            --secondary-color: #e53935;
+            --secondary-light: #ff6b6b;
+            --success-color: #10b981;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --bg-light: #f8fafc;
+            --border-radius: 16px;
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.15);
+            --shadow-brand: 0 10px 25px rgba(229,57,53,0.25);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .layout-container {
+            display: flex !important;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .sidebar {
+            background: var(--primary-color);
+            width: 280px !important;
+            min-width: 280px !important;
+            flex-shrink: 0 !important;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            color: white;
+            z-index: 10;
+        }
+
+        .main-content {
+            flex: 1 !important;
+            width: calc(100% - 280px) !important;
+            max-width: calc(100% - 280px) !important;
+            min-width: 0 !important;
+            overflow-x: hidden;
+            padding: 24px;
+        }
+
+        .sidebar a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 12px;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(135deg, var(--secondary-color), #ff6b6b);
+            color: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.4);
+        }
+
+        .sidebar .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 0 12px 20px;
+        }
+
+        .user-info .badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: capitalize;
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1 1 0%;
+            min-width: 0;
+            max-width: calc(100% - 280px);
+            padding: 24px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), #2d2d30);
+            color: white;
+            padding: 24px 28px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .page-header h3 { font-weight: 700; margin-bottom: 0; color: #ffffff; }
+        .page-header p { opacity: 0.85; margin-bottom: 0; margin-top: 0.5rem; font-size: 0.9rem; color: #ffffff; }
+
+        .card {
+            border: none;
+            border-radius: 1rem;
+            background: white;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+        .card-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            background: white;
+        }
+
+        .card-header h5 {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .card-body { padding: 1.5rem; }
+
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            display: block !important;
+        }
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-responsive > .table {
+            min-width: 920px;
+            margin-bottom: 0;
+        }
+
+        .report-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--secondary-color);
+        }
+
+        .report-card i {
+            font-size: 2rem;
+            margin-bottom: 0.625rem;
+            display: block;
+        }
+
+        .report-card h5 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-card p {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #b71c1c);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ef4444, #b71c1c);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #34d399, #059669);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info-color), #2563eb);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            margin: 0 0.75rem;
+            border-radius: 0.625rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: white;
+        }
+
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.75rem;
+            background: white;
+            padding: 0 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            z-index: 100;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #0f0f10;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show { display: block; }
+
+        @media (max-width: 768px) {
+            .mobile-header { display: flex; }
+
+            .layout-container { flex-direction: column; }
+
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+                padding-top: 3.75rem;
+                width: 280px !important;
+            }
+
+            .sidebar.show { transform: translateX(0) !important; }
+
+            .main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 3.75rem;
+                padding-top: 1rem;
+            }
+
+            .page-header { padding: 1.25rem 1rem; border-radius: 12px; }
+            .page-header h3 { font-size: 1.3rem; }
+            .card { margin-bottom: 1rem; border-radius: 12px; }
+        }
+    </style>
+
+    <script>
+        window.onload = function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        };
+
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                window.scrollTo(0, 0);
+            }
+        };
+    </script>
+
+    <link href="{{ url_for('static', filename='css/design-system.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Mobile Header -->
+    <header class="mobile-header fixed-top">
+        <button class="btn btn-dark" onclick="toggleSidebar()">
+            <i class="bi bi-list fs-6"></i>
+        </button>
+        <span class="mobile-brand"><i class="bi bi-car-front me-1"></i>Automan</span>
+        <button class="btn btn-dark" onclick="logout()">
+            <i class="bi bi-box-arrow-right fs-6"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="bi bi-car-front me-2"></i>Automan
+            </div>
+            <hr>
+
+            <div class="user-info text-center">
+                <div class="mb-2"><strong id="displayName">-</strong></div>
+                <span class="badge bg-secondary" id="displayRole">-</span>
+            </div>
+
+            <nav id="sidebarNav"></nav>
+
+            <button class="btn btn-outline-light w-100 mt-3" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h3><i class="bi bi-bar-chart me-2"></i>Reports</h3>
+                <p class="page-subtitle">View business analytics and reports</p>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center p-4 report-card cursor-pointer" onclick="loadReport('appointments')">
+                        <i class="bi bi-calendar-check text-primary d-block report-icon-info"></i>
+                        <h5>Appointments Report</h5>
+                        <p class="text-muted mb-3">View appointment statistics and details</p>
+                        <button class="btn btn-info">View</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center p-4 report-card cursor-pointer" onclick="loadReport('job-orders')">
+                        <i class="bi bi-clipboard-check d-block report-icon-warning"></i>
+                        <h5>Job Orders Report</h5>
+                        <p class="text-muted mb-3">View job order statistics</p>
+                        <button class="btn btn-primary">View</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center p-4 report-card cursor-pointer" onclick="loadReport('sales')">
+                        <i class="bi bi-receipt text-success d-block report-icon-success"></i>
+                        <h5>Sales Report</h5>
+                        <p class="text-muted mb-3">View sales and revenue</p>
+                        <button class="btn btn-success">View</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body d-flex flex-wrap align-items-end gap-3">
+                    <div>
+                        <label class="form-label small fw-semibold mb-1">From</label>
+                        <input type="date" class="form-control" id="reportStartDate">
+                    </div>
+                    <div>
+                        <label class="form-label small fw-semibold mb-1">To</label>
+                        <input type="date" class="form-control" id="reportEndDate">
+                    </div>
+                    <button class="btn btn-primary" onclick="applyReportFilter()"><i class="bi bi-funnel me-1"></i>Apply Filter</button>
+                    <button class="btn btn-outline-secondary" onclick="clearReportFilter()">Clear</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <h5 id="reportTitle" class="mb-0"><i class="bi bi-chart-line me-2"></i>Select a Report</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="exportReportToExcel()"><i class="bi bi-file-earmark-excel me-1"></i>Export to Excel</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="printReport()"><i class="bi bi-printer me-1"></i>Print</button>
+                    </div>
+                </div>
+                <div class="card-body" id="reportContent">
+                    <p class="text-muted text-center py-4">Click on a report above to view details</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/auth-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/automan-nav.js') }}"></script>
+    <script>
+        const API_BASE = '/api';
+        let authToken = sessionStorage.getItem('token');
+
+        if (!authToken) window.location.href = '/login';
+        const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+        if (!['admin', 'staff'].includes(user.role)) window.location.href = user.role === 'customer' ? '/customer' : '/dashboard';
+
+        buildSidebar();
+
+        let currentReportType = null;
+        let currentReportData = null;
+
+        function reportDateParams() {
+            const start = document.getElementById('reportStartDate').value;
+            const end = document.getElementById('reportEndDate').value;
+            const params = new URLSearchParams();
+            if (start) params.set('start_date', start);
+            if (end) params.set('end_date', end);
+            const qs = params.toString();
+            return qs ? `?${qs}` : '';
+        }
+
+        function applyReportFilter() {
+            if (!currentReportType) {
+                alert('Select a report above first');
+                return;
+            }
+            loadReport(currentReportType);
+        }
+
+        function clearReportFilter() {
+            document.getElementById('reportStartDate').value = '';
+            document.getElementById('reportEndDate').value = '';
+            if (currentReportType) loadReport(currentReportType);
+        }
+
+        async function loadReport(type) {
+            currentReportType = type;
+            const reportTitle = document.getElementById('reportTitle');
+            const reportContent = document.getElementById('reportContent');
+
+            reportContent.innerHTML = '<p class="text-center">Loading...</p>';
+
+            try {
+                let data, title;
+                const qs = reportDateParams();
+
+                if (type === 'appointments') {
+                    const response = await fetch(`${API_BASE}/reports/appointments${qs}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    data = await response.json();
+                    currentReportData = data;
+                    title = 'Appointments Report';
+
+                    reportContent.innerHTML = `
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Total:</strong> ${data.summary.total}</div>
+                            <div class="col-md-3"><strong>Pending:</strong> ${data.summary.pending}</div>
+                            <div class="col-md-3"><strong>Approved:</strong> ${data.summary.approved}</div>
+                            <div class="col-md-3"><strong>Rejected:</strong> ${data.summary.rejected}</div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead><tr><th>ID</th><th>Customer</th><th>Vehicle</th><th>Date</th><th>Time</th><th>Status</th><th>Estimate</th></tr></thead>
+                                <tbody>
+                                    ${data.appointments.length ? data.appointments.map(a => `<tr>
+                                        <td>${escapeHtml(a.appointment_number || '—')}</td>
+                                        <td>${escapeHtml(a.customer?.name || 'N/A')}</td>
+                                        <td>${a.vehicle ? escapeHtml(`${a.vehicle.make || ''} ${a.vehicle.model || ''}`.trim()) : '-'}</td>
+                                        <td>${a.preferred_date || '-'}</td>
+                                        <td>${a.preferred_time || '-'}</td>
+                                        <td>${a.status}</td>
+                                        <td>${a.min_estimate != null ? `PHP ${Number(a.min_estimate).toLocaleString()} - ${Number(a.max_estimate || a.min_estimate).toLocaleString()}` : '-'}</td>
+                                    </tr>`).join('') : '<tr><td colspan="7" class="text-center text-muted py-3">No appointments in this range</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else if (type === 'job-orders') {
+                    const response = await fetch(`${API_BASE}/reports/job-orders${qs}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    data = await response.json();
+                    currentReportData = data;
+                    title = 'Job Orders Report';
+
+                    reportContent.innerHTML = `
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Total:</strong> ${data.summary.total}</div>
+                            <div class="col-md-3"><strong>Pending:</strong> ${data.summary.pending}</div>
+                            <div class="col-md-3"><strong>In Progress:</strong> ${data.summary.in_progress}</div>
+                            <div class="col-md-3"><strong>Completed:</strong> ${data.summary.completed}</div>
+                        </div>
+                        <p><strong>Total Revenue (Completed):</strong> PHP ${data.summary.total_revenue.toLocaleString()}</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead><tr><th>Job Order #</th><th>Vehicle</th><th>Mechanic</th><th>Status</th><th>Priority</th><th>Created</th><th>Total Cost</th></tr></thead>
+                                <tbody>
+                                    ${data.job_orders.length ? data.job_orders.map(jo => `<tr>
+                                        <td>${escapeHtml(jo.job_order_number || '—')}</td>
+                                        <td>${jo.vehicle ? escapeHtml(`${jo.vehicle.make || ''} ${jo.vehicle.model || ''}`.trim()) : '-'}</td>
+                                        <td>${escapeHtml(jo.user?.username || jo.user?.full_name || '-')}</td>
+                                        <td>${jo.status}</td>
+                                        <td>${jo.priority || '-'}</td>
+                                        <td>${jo.created_at ? jo.created_at.split('T')[0] : '-'}</td>
+                                        <td>PHP ${Number(jo.total_cost || 0).toLocaleString()}</td>
+                                    </tr>`).join('') : '<tr><td colspan="7" class="text-center text-muted py-3">No job orders in this range</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else if (type === 'sales') {
+                    const response = await fetch(`${API_BASE}/reports/sales${qs}`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    data = await response.json();
+                    currentReportData = data;
+                    title = 'Sales Report';
+
+                    reportContent.innerHTML = `
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Total Sales:</strong> ${data.summary.total_sales}</div>
+                            <div class="col-md-3"><strong>Revenue:</strong> PHP ${data.summary.total_revenue.toLocaleString()}</div>
+                            <div class="col-md-3"><strong>Paid:</strong> PHP ${data.summary.total_paid.toLocaleString()}</div>
+                            <div class="col-md-3"><strong>Pending:</strong> PHP ${data.summary.total_pending.toLocaleString()}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>Parts Cost:</strong> PHP ${data.summary.total_parts_cost.toLocaleString()}</div>
+                            <div class="col-md-3"><strong class="text-success">Total Profit:</strong> <span class="text-success fw-bold">PHP ${data.summary.total_profit.toLocaleString()}</span></div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead><tr><th>Invoice #</th><th>Customer</th><th>Vehicle</th><th>Plate #</th><th>Service Performed</th><th>Date Appointed</th><th>Date Performed</th><th>Total</th><th>Paid</th><th>Balance</th><th>Profit</th><th>Status</th><th>Date Invoiced</th></tr></thead>
+                                <tbody>
+                                    ${data.sales.length ? data.sales.map(s => `<tr>
+                                        <td>${escapeHtml(s.invoice_number || '—')}</td>
+                                        <td>${s.customer_name ? escapeHtml(s.customer_name) : '-'}</td>
+                                        <td>${s.vehicle_info ? escapeHtml(s.vehicle_info) : '-'}</td>
+                                        <td>${s.vehicle_plate ? escapeHtml(s.vehicle_plate) : '-'}</td>
+                                        <td>${(s.services && s.services.length) ? escapeHtml(s.services.join(', ')) : '-'}</td>
+                                        <td>${s.appointment_date ? s.appointment_date.split('T')[0] : '-'}</td>
+                                        <td>${s.date_performed ? s.date_performed.split('T')[0] : '-'}</td>
+                                        <td>PHP ${Number(s.total || 0).toLocaleString()}</td>
+                                        <td>PHP ${Number(s.amount_paid || 0).toLocaleString()}</td>
+                                        <td>PHP ${Number(s.balance_due || 0).toLocaleString()}</td>
+                                        <td class="text-success fw-bold">PHP ${Number(s.profit || 0).toLocaleString()}</td>
+                                        <td>${s.payment_status}</td>
+                                        <td>${s.created_at ? s.created_at.split('T')[0] : '-'}</td>
+                                    </tr>`).join('') : '<tr><td colspan="13" class="text-center text-muted py-3">No sales in this range</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                reportTitle.textContent = title;
+            } catch (error) {
+                reportContent.innerHTML = '<p class="text-danger">Error loading report</p>';
+            }
+        }
+
+        function csvEscape(val) {
+            const s = String(val ?? '');
+            if (/[",\r\n]/.test(s)) {
+                return `"${s.replace(/"/g, '""')}"`;
+            }
+            return s;
+        }
+
+        function exportReportToExcel() {
+            if (!currentReportType || !currentReportData) {
+                alert('Select a report above first');
+                return;
+            }
+
+            let rows = [];
+            let filename = 'report';
+
+            if (currentReportType === 'appointments') {
+                filename = 'appointments_report';
+                rows.push(['ID', 'Customer', 'Vehicle', 'Date', 'Time', 'Status', 'Estimate']);
+                currentReportData.appointments.forEach(a => {
+                    rows.push([
+                        a.appointment_number || '',
+                        a.customer?.name || 'N/A',
+                        a.vehicle ? `${a.vehicle.make || ''} ${a.vehicle.model || ''}`.trim() : '',
+                        a.preferred_date || '',
+                        a.preferred_time || '',
+                        a.status || '',
+                        a.min_estimate != null ? `PHP ${Number(a.min_estimate).toLocaleString()} - ${Number(a.max_estimate || a.min_estimate).toLocaleString()}` : ''
+                    ]);
+                });
+            } else if (currentReportType === 'job-orders') {
+                filename = 'job_orders_report';
+                rows.push(['Job Order #', 'Vehicle', 'Mechanic', 'Status', 'Priority', 'Created', 'Total Cost']);
+                currentReportData.job_orders.forEach(jo => {
+                    rows.push([
+                        jo.job_order_number || '',
+                        jo.vehicle ? `${jo.vehicle.make || ''} ${jo.vehicle.model || ''}`.trim() : '',
+                        jo.user?.username || jo.user?.full_name || '',
+                        jo.status || '',
+                        jo.priority || '',
+                        jo.created_at ? jo.created_at.split('T')[0] : '',
+                        Number(jo.total_cost || 0)
+                    ]);
+                });
+            } else if (currentReportType === 'sales') {
+                filename = 'sales_report';
+                rows.push(['Invoice #', 'Customer', 'Vehicle', 'Plate #', 'Service Performed', 'Date Appointed', 'Date Performed', 'Total', 'Paid', 'Balance', 'Profit', 'Status', 'Date Invoiced']);
+                currentReportData.sales.forEach(s => {
+                    rows.push([
+                        s.invoice_number || '',
+                        s.customer_name || '',
+                        s.vehicle_info || '',
+                        s.vehicle_plate || '',
+                        (s.services && s.services.length) ? s.services.join(', ') : '',
+                        s.appointment_date ? s.appointment_date.split('T')[0] : '',
+                        s.date_performed ? s.date_performed.split('T')[0] : '',
+                        Number(s.total || 0),
+                        Number(s.amount_paid || 0),
+                        Number(s.balance_due || 0),
+                        Number(s.profit || 0),
+                        s.payment_status || '',
+                        s.created_at ? s.created_at.split('T')[0] : ''
+                    ]);
+                });
+            }
+
+            const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
+            const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function printReport() {
+            if (!currentReportType || !currentReportData) {
+                alert('Select a report above first');
+                return;
+            }
+
+            const reportContent = document.getElementById('reportContent');
+            const reportTitleText = document.getElementById('reportTitle').textContent;
+            const start = document.getElementById('reportStartDate').value;
+            const end = document.getElementById('reportEndDate').value;
+            const rangeLabel = (start || end) ? `${start || 'Start'} to ${end || 'Present'}` : 'All time';
+
+            const win = window.open('', '_blank', 'width=1000,height=1200');
+            if (!win) { alert('Please allow pop-ups to print the report'); return; }
+            win.document.write(`<!DOCTYPE html><html><head><title>${reportTitleText}</title><style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 24px; color: #1e293b; }
+                .print-report-header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e293b; padding-bottom: 12px; }
+                .print-report-title { font-size: 1.4rem; font-weight: 900; margin: 0; }
+                .print-report-sub { font-size: .8rem; color: #64748b; margin-top: 4px; }
+                table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 10px; }
+                th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+                th { background: #f1f5f9; }
+                .row > div { display: inline-block; margin-right: 20px; margin-bottom: 6px; }
+                .table-responsive { overflow: visible !important; }
+                @media print { @page { size: A4 landscape; margin: 10mm; } body { padding: 0; } }
+            </style></head><body>
+                <div class="print-report-header">
+                    <h1 class="print-report-title">Automan Car Care Center</h1>
+                    <div class="print-report-sub">${reportTitleText} &mdash; ${rangeLabel}</div>
+                    <div class="print-report-sub">Generated ${new Date().toLocaleString()}</div>
+                </div>
+                ${reportContent.innerHTML}
+            </body></html>`);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); }, 300);
+        }
+
+    </script>
+</body>
+</html>
